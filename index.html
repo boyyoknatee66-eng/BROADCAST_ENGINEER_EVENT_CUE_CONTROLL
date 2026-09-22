@@ -271,6 +271,11 @@
                     <input type="text" id="event-label" required placeholder="เช่น ถ่ายทอดสดผ่านดาวเทียม ช่อง 1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
 
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">รายละเอียด</label>
+                    <input type="text" id="event-detail" placeholder="เช่น ถ่ายทอดสด Asian Game" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+
                 <!-- Start Time & End Time (HH:MM) Inputs -->
                 <div class="grid grid-cols-2 gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
                     <div>
@@ -445,6 +450,7 @@
             eventStartTimecode: document.getElementById('event-start-timecode'),
             eventEndTimecode: document.getElementById('event-end-timecode'),
             eventDuration: document.getElementById('event-duration'),
+            eventDetail: document.getElementById('event-detail'),
 
             // Layer Settings Modal Elements
             layerModal: document.getElementById('layer-modal'),
@@ -665,6 +671,9 @@
             const widthPx = Math.max(12, evt.duration * state.pxPerSecond);
             const startTimeStr = secondsToTimecode(evt.start);
             const endTimeStr = secondsToTimecode(evt.start + evt.duration);
+            const durH = Math.floor(evt.duration / 3600);
+            const durM = Math.floor((evt.duration % 3600) / 60);
+            const durStr = durH > 0 ? `${durH}h${String(durM).padStart(2, '0')}m` : `${durM}m`;
 
             const clip = document.createElement('div');
             clip.id = evt.id;
@@ -682,14 +691,14 @@
                         <i class="fa-solid fa-play text-[8px] text-emerald-300"></i>
                     </div>` : ''}
                     <div class="truncate">
-                        ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.label}</div>` : ''}
+                        ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.label}${evt.detail ? ' <span class="font-normal text-[12px] opacity-80 normal-case">' + evt.detail + '</span>' : ''}</div>` : ''}
                         ${!isVeryCompact ? `<div class="text-[12px] opacity-90 font-mono">${startTimeStr} - ${endTimeStr}</div>` : ''}
                     </div>
                 </div>
                 
                 ${!isVeryCompact ? `
                 <div class="flex items-center space-x-1 opacity-80 group-hover:opacity-100 transition shrink-0 ml-1">
-                    <span class="font-mono text-[9px] bg-black/40 px-1 py-0.5 rounded border border-white/10">${evt.duration}s</span>
+                    <span class="font-mono text-[9px] bg-black/40 px-1 py-0.5 rounded border border-white/10 truncate max-w-[120px]">${evt.label}, ${durStr}</span>
                 </div>` : ''}
 
                 <div class="resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/40 rounded-r-lg"></div>
@@ -1022,6 +1031,7 @@
                     start: ev.start,
                     duration: ev.duration,
                     label: ev.label,
+                    detail: ev.detail || '',
                     color: ev.color,
                     alert: ev.alert
                 });
@@ -1130,6 +1140,7 @@
                 document.getElementById('event-id').value = evt.id;
                 document.getElementById('event-layer').value = evt.layerId;
                 document.getElementById('event-label').value = evt.label;
+                elements.eventDetail.value = evt.detail || '';
                 
                 elements.eventStartTimecode.value = secondsToTimecode(evt.start);
                 elements.eventEndTimecode.value = secondsToTimecode(evt.start + evt.duration);
@@ -1201,6 +1212,7 @@
                 id: id || `evt-${Date.now()}`,
                 layerId: document.getElementById('event-layer').value,
                 label: document.getElementById('event-label').value,
+                detail: elements.eventDetail.value,
                 start: startSec,
                 duration: duration,
                 color: document.getElementById('event-color').value,
