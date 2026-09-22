@@ -1,0 +1,3370 @@
+{
+  "currentSystemSeconds": 56375.497,
+  "activeSpanSeconds": 43200,
+  "pxPerSecond": 0.03833333333333333,
+  "audioEnabled": true,
+  "activeCuesTriggered": {},
+  "selectedEvents": {},
+  "pasteMode": false,
+  "userOffsetPx": -195,
+  "undoHistory": [
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53348,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53348,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53348,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53348,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53348,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53348,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53348,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64748,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "id": "demo-3",
+          "layerId": "track-3",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052769065",
+          "layerId": "track-3",
+          "label": "ตามTV",
+          "start": 52,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790052846032",
+          "layerId": "track-3",
+          "label": "ADS_MAIN ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-jhwl4",
+          "layerId": "track-1",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-sou94",
+          "layerId": "track-1",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064356354-mztx8",
+          "layerId": "track-1",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l2p3u",
+          "layerId": "track-2",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-l1wsa",
+          "layerId": "track-2",
+          "label": "ถ่ายทอดสด Asian Game",
+          "start": 53400,
+          "duration": 11400,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064365112-vms3i",
+          "layerId": "track-2",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "purple",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-lkrlf",
+          "layerId": "track-1790053066045",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-dh2ud",
+          "layerId": "track-1790053066045",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064376948-ofp10",
+          "layerId": "track-1790053066045",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-uhbjg",
+          "layerId": "track-1790053139532",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53348,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-sc0xv",
+          "layerId": "track-1790053139532",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064397360-1vxz1",
+          "layerId": "track-1790053139532",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-w3a7z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTV",
+          "start": 0,
+          "duration": 53400,
+          "color": "amber",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-jpnhh",
+          "layerId": "track-1790053508039",
+          "label": "FEED13 -------PLAYOUT เล่น content",
+          "start": 53400,
+          "duration": 11400,
+          "color": "rose",
+          "alert": 30
+        },
+        {
+          "id": "evt-1790064404306-9qf9z",
+          "layerId": "track-1790053508039",
+          "label": "ตามTVปกติ",
+          "start": 64800,
+          "duration": 125739,
+          "color": "amber",
+          "alert": 30
+        }
+      ],
+      "layers": [
+        {
+          "id": "track-1",
+          "name": "Thairath32HD",
+          "icon": "fa-tv",
+          "color": "border-emerald-500 text-emerald-400"
+        },
+        {
+          "id": "track-2",
+          "name": "C-BAND,KU-BAND",
+          "icon": "fa-satellite-dish",
+          "color": "border-amber-500 text-amber-400"
+        },
+        {
+          "id": "track-3",
+          "name": "Web/App/Samsung",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053066045",
+          "name": "INT_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053139532",
+          "name": "INT_IN2",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790053508039",
+          "name": "NET_IN1",
+          "icon": "fa-globe",
+          "color": "border-blue-500 text-blue-400"
+        },
+        {
+          "id": "track-1790065133043",
+          "name": "คันหน้า",
+          "icon": "fa-sliders",
+          "color": "border-rose-500 text-rose-400"
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "id": "track-1",
+      "name": "Thairath32HD",
+      "icon": "fa-tv",
+      "color": "border-emerald-500 text-emerald-400"
+    },
+    {
+      "id": "track-2",
+      "name": "C-BAND,KU-BAND",
+      "icon": "fa-satellite-dish",
+      "color": "border-amber-500 text-amber-400"
+    },
+    {
+      "id": "track-3",
+      "name": "Web/App/Samsung",
+      "icon": "fa-globe",
+      "color": "border-blue-500 text-blue-400"
+    },
+    {
+      "id": "track-1790053066045",
+      "name": "INT_IN1",
+      "icon": "fa-globe",
+      "color": "border-blue-500 text-blue-400"
+    },
+    {
+      "id": "track-1790053139532",
+      "name": "INT_IN2",
+      "icon": "fa-globe",
+      "color": "border-blue-500 text-blue-400"
+    },
+    {
+      "id": "track-1790053508039",
+      "name": "NET_IN1",
+      "icon": "fa-globe",
+      "color": "border-blue-500 text-blue-400"
+    },
+    {
+      "id": "track-1790065133043",
+      "name": "คันหน้า",
+      "icon": "fa-sliders",
+      "color": "border-rose-500 text-rose-400"
+    }
+  ],
+  "events": [
+    {
+      "id": "demo-3",
+      "layerId": "track-3",
+      "label": "FEED13 -------PLAYOUT เล่น content",
+      "start": 53400,
+      "duration": 11400,
+      "color": "rose",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790052769065",
+      "layerId": "track-3",
+      "label": "ตามTV",
+      "start": 52,
+      "duration": 53348,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790052846032",
+      "layerId": "track-3",
+      "label": "ADS_MAIN ตามTVปกติ",
+      "start": 64800,
+      "duration": 125739,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064356354-jhwl4",
+      "layerId": "track-1",
+      "label": "ตามTVปกติ",
+      "start": 64800,
+      "duration": 125739,
+      "color": "purple",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064356354-sou94",
+      "layerId": "track-1",
+      "label": "ถ่ายทอดสด Asian Game",
+      "start": 53400,
+      "duration": 11400,
+      "color": "purple",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064356354-mztx8",
+      "layerId": "track-1",
+      "label": "ตามTV",
+      "start": 0,
+      "duration": 53400,
+      "color": "purple",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064365112-l2p3u",
+      "layerId": "track-2",
+      "label": "ตามTV",
+      "start": 0,
+      "duration": 53400,
+      "color": "purple",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064365112-l1wsa",
+      "layerId": "track-2",
+      "label": "ถ่ายทอดสด Asian Game",
+      "start": 53400,
+      "duration": 11400,
+      "color": "purple",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064365112-vms3i",
+      "layerId": "track-2",
+      "label": "ตามTVปกติ",
+      "start": 64800,
+      "duration": 125739,
+      "color": "purple",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064376948-lkrlf",
+      "layerId": "track-1790053066045",
+      "label": "ตามTV",
+      "start": 0,
+      "duration": 53400,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064376948-dh2ud",
+      "layerId": "track-1790053066045",
+      "label": "FEED13 -------PLAYOUT เล่น content",
+      "start": 53400,
+      "duration": 11400,
+      "color": "rose",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064376948-ofp10",
+      "layerId": "track-1790053066045",
+      "label": "ตามTVปกติ",
+      "start": 64800,
+      "duration": 125739,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064397360-uhbjg",
+      "layerId": "track-1790053139532",
+      "label": "ตามTV",
+      "start": 0,
+      "duration": 53400,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064397360-sc0xv",
+      "layerId": "track-1790053139532",
+      "label": "FEED13 -------PLAYOUT เล่น content",
+      "start": 53400,
+      "duration": 11400,
+      "color": "rose",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064397360-1vxz1",
+      "layerId": "track-1790053139532",
+      "label": "ตามTVปกติ",
+      "start": 64800,
+      "duration": 125739,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064404306-w3a7z",
+      "layerId": "track-1790053508039",
+      "label": "ตามTV",
+      "start": 0,
+      "duration": 53400,
+      "color": "amber",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064404306-jpnhh",
+      "layerId": "track-1790053508039",
+      "label": "FEED13 -------PLAYOUT เล่น content",
+      "start": 53400,
+      "duration": 11400,
+      "color": "rose",
+      "alert": 30
+    },
+    {
+      "id": "evt-1790064404306-9qf9z",
+      "layerId": "track-1790053508039",
+      "label": "ตามTVปกติ",
+      "start": 64800,
+      "duration": 125739,
+      "color": "amber",
+      "alert": 30
+    }
+  ]
+}
