@@ -20,6 +20,7 @@
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
+        input[type="date"] { color-scheme: dark; }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -178,9 +179,23 @@
 
         <!-- Control Action Tools -->
         <div class="flex items-center space-x-2">
+            <div class="flex items-center gap-1.5">
+                <button id="btn-date-prev" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="วันก่อนหน้า"><i class="fa-solid fa-chevron-left"></i></button>
+                <input type="date" id="view-date" class="bg-slate-800 text-slate-200 border border-slate-700 rounded-lg px-2 py-1 text-[15px] font-mono" title="เลือกวันที่ (เก็บข้อมูล 3 เดือน)">
+                <button id="btn-date-next" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="วันถัดไป"><i class="fa-solid fa-chevron-right"></i></button>
+                <button id="btn-date-today" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition">วันนี้</button>
+                <span id="date-badge"></span>
+                <span id="save-status" class="text-[11px] text-slate-500 font-mono hidden lg:inline"></span>
+            </div>
+            <div class="h-6 w-px bg-slate-800 mx-1"></div>
             <button id="btn-audio-toggle" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="Toggle Cue Beep Audio">
                 <i id="audio-icon" class="fa-solid fa-volume-high text-emerald-400"></i> <span id="audio-status-text">เปิดเสียงเตือน</span>
             </button>
+            <div class="h-6 w-px bg-slate-800 mx-1"></div>
+            <button id="btn-tools-toggle" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="ซ่อน/แสดงเครื่องมือแก้ไข" aria-expanded="false">
+                <i class="fa-solid fa-screwdriver-wrench text-slate-400"></i> <span id="tools-toggle-text">แสดงเครื่องมือ</span>
+            </button>
+            <div id="edit-tools" class="hidden items-center space-x-2">
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
             <button id="btn-add-layer" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5">
                 <i class="fa-solid fa-layer-group text-blue-400"></i> เพิ่มเลเยอร์
@@ -212,6 +227,7 @@
                 <i class="fa-solid fa-upload"></i>
             </button>
             <input type="file" id="import-file-input" class="hidden" accept=".json">
+            </div>
         </div>
     </header>
 
@@ -281,7 +297,6 @@
                 <button data-span="21600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">6 ชม.</button>
                 <button data-span="43200" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">12 ชม.</button>
                 <button data-span="86400" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">24 ชม.</button>
-                <button data-span="172800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">48 ชม.</button>
             </div>
         </div>
     </footer>
@@ -575,6 +590,157 @@
             timePresetsContainer: document.getElementById('time-presets-container')
         };
 
+        // ===== บันทึกอัตโนมัติ (localStorage) + เลือกวันที่ + เก็บข้อมูล 3 เดือน =====
+        const STORAGE_KEY = 'broadcast-cue-schedule-v1';
+        const dateUI = {
+            input: document.getElementById('view-date'),
+            prev: document.getElementById('btn-date-prev'),
+            next: document.getElementById('btn-date-next'),
+            today: document.getElementById('btn-date-today'),
+            badge: document.getElementById('date-badge'),
+            status: document.getElementById('save-status')
+        };
+        let lastSavedBody = '';
+        let storageErrorShown = false;
+
+        function dateKey(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        function shiftDateKey(key, days) {
+            const [y, m, d] = key.split('-').map(Number);
+            return dateKey(new Date(y, m - 1, d + days));
+        }
+        // ช่วงที่เก็บ: วันที่ 1 ของเดือนที่แล้ว ถึง วันสุดท้ายของเดือนหน้า
+        function windowStartKey() { const n = new Date(); return dateKey(new Date(n.getFullYear(), n.getMonth() - 1, 1)); }
+        function windowEndKey() { const n = new Date(); return dateKey(new Date(n.getFullYear(), n.getMonth() + 2, 0)); }
+
+        function clampEventToDay(e) {
+            const start = Math.min(Math.max(0, Number(e.start) || 0), 86399);
+            const duration = Math.min(Math.max(1, Number(e.duration) || 1), 86400 - start);
+            return { ...e, start, duration };
+        }
+
+        function pruneOldEvents() {
+            const start = windowStartKey();
+            const before = state.events.length;
+            state.events = state.events.filter(e => !e.date || e.date >= start);
+            const removed = before - state.events.length;
+            if (removed > 0) showToast(`ลบอีเวนท์ที่เก่ากว่า ${start} จำนวน ${removed} รายการ`, 'amber');
+        }
+
+        function loadFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (Array.isArray(saved.layers) && Array.isArray(saved.events)) {
+                    state.layers = saved.layers;
+                    state.events = saved.events.map(e => clampEventToDay({ ...e, date: e.date || state.todayKey }));
+                }
+            } catch (err) {
+                console.warn('โหลดข้อมูลที่บันทึกไว้ไม่สำเร็จ', err);
+            }
+        }
+
+        function saveToStorage() {
+            try {
+                const body = JSON.stringify({ layers: state.layers, events: state.events });
+                if (body === lastSavedBody) return;
+                localStorage.setItem(STORAGE_KEY, body);
+                lastSavedBody = body;
+                dateUI.status.textContent = `บันทึกแล้ว ${new Date().toTimeString().slice(0, 8)}`;
+                dateUI.status.classList.remove('text-red-400');
+                dateUI.status.classList.add('text-slate-500');
+            } catch (err) {
+                dateUI.status.textContent = 'บันทึกไม่ได้';
+                dateUI.status.classList.remove('text-slate-500');
+                dateUI.status.classList.add('text-red-400');
+                if (!storageErrorShown) {
+                    storageErrorShown = true;
+                    showToast('บันทึกลงเบราว์เซอร์ไม่ได้ (พื้นที่เต็มหรือปิดการเก็บข้อมูล) กรุณา Export สำรองไว้', 'red');
+                }
+            }
+        }
+
+        function updateDateUI() {
+            const min = windowStartKey(), max = windowEndKey();
+            dateUI.input.min = min;
+            dateUI.input.max = max;
+            dateUI.input.value = state.viewDate;
+            dateUI.prev.disabled = state.viewDate <= min;
+            dateUI.next.disabled = state.viewDate >= max;
+            const isToday = state.viewDate === state.todayKey;
+            // ป้ายแสดงเฉพาะตอนดูวันอื่น (วันนี้ไม่แสดง)
+            dateUI.badge.textContent = isToday ? '' : 'ไม่ใช่วันนี้ • ไม่มีเสียงเตือน';
+            dateUI.badge.className = isToday
+                ? 'hidden'
+                : 'text-[11px] px-2 py-1 rounded-md font-medium border bg-amber-500/15 text-amber-400 border-amber-500/30';
+        }
+
+        function setViewDate(key) {
+            const min = windowStartKey(), max = windowEndKey();
+            if (key < min || key > max) {
+                showToast(`เลือกได้เฉพาะ ${min} ถึง ${max} (เก็บข้อมูล 3 เดือน)`, 'amber');
+                key = key < min ? min : max;
+            }
+            if (state.pasteMode) deactivatePasteMode();
+            state.viewDate = key;
+            state.selectedEvents.clear();
+            renderTimeline();
+            updateSelectCount();
+            updateDateUI();
+        }
+
+        // เปลี่ยนวันตอนเที่ยงคืน: ถ้ากำลังดูวันนี้อยู่ ให้เลื่อนไปวันใหม่ และลบข้อมูลที่หลุดช่วง 3 เดือน
+        function syncToday(now) {
+            const key = dateKey(now);
+            if (key === state.todayKey) return;
+            const wasViewingToday = state.viewDate === state.todayKey;
+            state.todayKey = key;
+            if (wasViewingToday) state.viewDate = key;
+            pruneOldEvents();
+            renderTimeline();
+            updateDateUI();
+        }
+
+        function initToolsToggle() {
+            const KEY = 'broadcast-cue-tools-visible';
+            const panel = document.getElementById('edit-tools');
+            const btn = document.getElementById('btn-tools-toggle');
+            const text = document.getElementById('tools-toggle-text');
+            const apply = (show) => {
+                panel.classList.toggle('hidden', !show);
+                panel.classList.toggle('flex', show);
+                text.textContent = show ? 'ซ่อนเครื่องมือ' : 'แสดงเครื่องมือ';
+                btn.setAttribute('aria-expanded', String(show));
+            };
+            let visible = false;
+            try { visible = localStorage.getItem(KEY) === '1'; } catch (err) {}
+            apply(visible);
+            btn.addEventListener('click', () => {
+                visible = !visible;
+                apply(visible);
+                try { localStorage.setItem(KEY, visible ? '1' : '0'); } catch (err) {}
+            });
+        }
+
+        function initPersistence() {
+            initToolsToggle();
+            state.todayKey = dateKey(new Date());
+            state.viewDate = state.todayKey;
+            loadFromStorage();
+            pruneOldEvents();
+            updateDateUI();
+            saveToStorage();
+            setInterval(saveToStorage, 1500);
+            window.addEventListener('beforeunload', saveToStorage);
+            document.addEventListener('visibilitychange', () => { if (document.hidden) saveToStorage(); });
+            dateUI.prev.addEventListener('click', () => setViewDate(shiftDateKey(state.viewDate, -1)));
+            dateUI.next.addEventListener('click', () => setViewDate(shiftDateKey(state.viewDate, 1)));
+            dateUI.today.addEventListener('click', () => setViewDate(state.todayKey));
+            dateUI.input.addEventListener('change', () => { if (dateUI.input.value) setViewDate(dateUI.input.value); });
+        }
+
         function getViewportWidth() {
             return elements.canvasContainer.clientWidth || window.innerWidth - 256;
         }
@@ -665,7 +831,7 @@
             elements.layersContainer.innerHTML = '';
             elements.trackCount.textContent = `${state.layers.length} เลเยอร์`;
 
-            const totalWidth = 172800 * state.pxPerSecond;
+            const totalWidth = 86400 * state.pxPerSecond;
 
             state.layers.forEach((layer, layerIndex) => {
                 // Header element with ⚙️ Settings Button + Drag Handle
@@ -755,7 +921,7 @@
                 trackRow.style.width = `${totalWidth}px`;
                 trackRow.dataset.layerId = layer.id;
 
-                const trackEvents = state.events.filter(e => e.layerId === layer.id);
+                const trackEvents = state.events.filter(e => e.layerId === layer.id && e.date === state.viewDate);
                 trackEvents.forEach(evt => {
                     const clipEl = createClipElement(evt);
                     trackRow.appendChild(clipEl);
@@ -945,7 +1111,7 @@
             else if (span <= 86400) { majorStepSec = 14400; minorStepSec = 1800; }
             else { majorStepSec = 21600; minorStepSec = 3600; }
 
-            const totalSeconds = 172800;
+            const totalSeconds = 86400;
 
             for (let i = 0; i < totalSeconds; i += minorStepSec) {
                 const tick = document.createElement('div');
@@ -964,6 +1130,11 @@
 
                 elements.rulerTicks.appendChild(tick);
             }
+
+            const endEdge = document.createElement('div');
+            endEdge.className = 'absolute top-0 bottom-0 border-l border-slate-400/80';
+            endEdge.style.left = `${totalWidth}px`;
+            elements.rulerTicks.appendChild(endEdge);
         }
 
         function makeDraggableAndResizable(element, evtData) {
@@ -988,11 +1159,11 @@
                     if (!hasDragged) return;
 
                     if (isResizing) {
-                        const newWidth = Math.max(state.pxPerSecond * 2, initialWidth + deltaX);
+                        const newWidth = Math.min(Math.max(state.pxPerSecond * 2, initialWidth + deltaX), (86400 - evtData.start) * state.pxPerSecond);
                         element.style.width = `${newWidth}px`;
                         evtData.duration = Math.max(1, Math.round(newWidth / state.pxPerSecond));
                     } else {
-                        const newLeft = Math.max(0, initialLeft + deltaX);
+                        const newLeft = Math.min(Math.max(0, initialLeft + deltaX), Math.max(0, (86400 - evtData.duration) * state.pxPerSecond));
                         element.style.left = `${newLeft}px`;
                         evtData.start = Math.round(newLeft / state.pxPerSecond);
                     }
@@ -1017,6 +1188,7 @@
 
         function animationLoop() {
             const now = new Date();
+            syncToday(now);
             const hours = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
@@ -1060,7 +1232,7 @@
                 const clipEl = document.getElementById(evt.id);
                 if (!clipEl) return;
                 
-                const isCrossing = state.currentSystemSeconds >= evt.start && state.currentSystemSeconds <= (evt.start + evt.duration);
+                const isCrossing = evt.date === state.todayKey && state.currentSystemSeconds >= evt.start && state.currentSystemSeconds <= (evt.start + evt.duration);
                 if (isCrossing) {
                     clipEl.classList.add('clip-active-now');
                 } else {
@@ -1105,7 +1277,7 @@
 
         function checkAlertCues() {
             state.events.forEach(evt => {
-                if (!evt.alert || evt.alert === 0) return;
+                if (!evt.alert || evt.alert === 0 || evt.date !== state.todayKey) return;
 
                 const timeUntilStart = evt.start - state.currentSystemSeconds;
 
@@ -1213,7 +1385,7 @@
         }
 
         function activatePasteMode() {
-            if (state.selectedEvents.size === 0 && state.events.length > 0) {
+            if (state.selectedEvents.size === 0 && state.events.length > 0 && !(state._pasteData && state._pasteData.events && state._pasteData.events.length)) {
                 showToast('กรุณาเลือกอีเวนท์ก่อน Copy', 'amber');
                 return;
             }
@@ -1270,6 +1442,7 @@
                 state.events.push({
                     ...ev,
                     id: newId,
+                    date: state.viewDate,
                     layerId: newLayer ? newLayer.id : layerId,
                     start: ev.start,
                     duration: ev.duration,
@@ -1282,7 +1455,7 @@
 
             deactivatePasteMode();
             renderTimeline();
-            showToast(`วาง ${copiedEvents.length} อีเวนท์เรียบร้อย (เวลาเดิมคงเดิม)`, 'cyan');
+            showToast(`วาง ${copiedEvents.length} อีเวนท์ลงวันที่ ${state.viewDate} เรียบร้อย (เวลาเดิมคงเดิม)`, 'cyan');
         }
 
         function renderIconPickerGrid(selectedIconClass) {
@@ -1456,15 +1629,18 @@
             const startSec = timecodeToSeconds(elements.eventStartTimecode.value);
             const duration = parseFloat(elements.eventDuration.value);
 
+            if (startSec + duration > 86400) showToast('อีเวนท์ต้องจบภายใน 24:00 ระบบปรับระยะเวลาให้อัตโนมัติ', 'amber');
+            const existingEvt = id ? state.events.find(e => e.id === id) : null;
             const eventData = {
                 id: id || `evt-${Date.now()}`,
+                date: (existingEvt && existingEvt.date) || state.viewDate,
                 layerId: document.getElementById('event-layer').value,
                 label: document.getElementById('event-label').value,
                 detail: elements.eventDetail.value,
                 comment: elements.eventComment.value,
                 showTime: elements.eventShowTime.checked,
-                start: startSec,
-                duration: duration,
+                start: Math.min(startSec, 86399),
+                duration: Math.min(duration, 86400 - Math.min(startSec, 86399)),
                 color: document.getElementById('event-color').value,
                 alert: parseInt(document.getElementById('event-alert').value)
             };
@@ -1624,6 +1800,22 @@
             showToast(`ลบ ${count} อีเวนท์เรียบร้อย`, 'red');
         });
 
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const tag = document.activeElement.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                if (state.pasteMode) return;
+                if (state.selectedEvents.size === 0) return;
+                e.preventDefault();
+                saveUndoState();
+                const count = state.selectedEvents.size;
+                state.events = state.events.filter(evt => !state.selectedEvents.has(evt.id));
+                state.selectedEvents.clear();
+                renderTimeline();
+                showToast(`ลบ ${count} อีเวนท์เรียบร้อย`, 'red');
+            }
+        });
+
         elements.canvasContainer.addEventListener('click', (e) => {
             if (!e.target.closest('.clip-glow') && !state.pasteMode) {
                 state.selectedEvents.clear();
@@ -1632,10 +1824,10 @@
         });
 
         elements.btnExport.addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ layers: state.layers, events: state.events, exportedAt: new Date().toISOString() }, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `broadcast-schedule-${Date.now()}.json`);
+            downloadAnchor.setAttribute("download", `broadcast-schedule-${dateKey(new Date())}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -1699,8 +1891,14 @@
                 try {
                     const imported = JSON.parse(event.target.result);
                     if (imported.layers && imported.events) {
+                        if (!confirm('นำเข้าไฟล์นี้จะแทนที่ข้อมูลปัจจุบันทั้งหมด (กด Undo ย้อนกลับได้) ต้องการดำเนินการต่อหรือไม่?')) {
+                            elements.importFileInput.value = '';
+                            return;
+                        }
+                        saveUndoState();
                         state.layers = imported.layers;
-                        state.events = imported.events;
+                        state.events = imported.events.map(e => clampEventToDay({ ...e, date: e.date || state.viewDate }));
+                        pruneOldEvents();
                         renderTimeline();
                     }
                 } catch (err) {
@@ -1715,6 +1913,7 @@
         });
 
         window.addEventListener('load', () => {
+            initPersistence();
             renderTimeline();
             requestAnimationFrame(animationLoop);
         });
