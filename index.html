@@ -230,6 +230,7 @@
             <button id="btn-import-trigger" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition text-xs" title="Import Schedule Config">
                 <i class="fa-solid fa-upload"></i>
             </button>
+            <button id="btn-gcal" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="ดึงอีเวนท์จาก Google Calendar"><i class="fa-brands fa-google text-sky-400"></i> Google Calendar</button>
             <input type="file" id="import-file-input" class="hidden" accept=".json">
             </div>
         </div>
@@ -745,9 +746,189 @@
             });
         }
 
+        // ===== Google Calendar: ดึงอีเวนท์เข้าไทม์ไลน์ (อ่านอย่างเดียว) =====
+        const GCAL_KEY = 'broadcast-cue-gcal';
+        const gcal = { token: null, tokenExp: 0, calendars: [] };
+
+        function gcalSettings() { try { return JSON.parse(localStorage.getItem(GCAL_KEY)) || {}; } catch (err) { return {}; } }
+        function gcalSaveSettings(patch) { try { localStorage.setItem(GCAL_KEY, JSON.stringify({ ...gcalSettings(), ...patch })); } catch (err) {} }
+        // ข้อความจากปฏิทินอาจมาจากคนอื่น (คำเชิญ) ต้องตัด HTML ออกก่อนเข้าไทม์ไลน์
+        function gcalClean(v) {
+            return String(v || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '');
+        }
+        function gcalSetStatus(msg, isError) {
+            const el = document.getElementById('gcal-status');
+            el.textContent = msg;
+            el.className = 'text-[13px] min-h-[20px] ' + (isError ? 'text-red-400' : 'text-slate-400');
+        }
+
+        function gcalLoadGis() {
+            return new Promise((resolve, reject) => {
+                if (window.google && google.accounts && google.accounts.oauth2) return resolve();
+                const sc = document.createElement('script');
+                sc.src = 'https://accounts.google.com/gsi/client';
+                sc.onload = () => resolve();
+                sc.onerror = () => reject(new Error('โหลดสคริปต์ Google ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต'));
+                document.head.appendChild(sc);
+            });
+        }
+
+        async function gcalGetToken(clientId) {
+            if (gcal.token && Date.now() < gcal.tokenExp - 60000) return gcal.token;
+            await gcalLoadGis();
+            return new Promise((resolve, reject) => {
+                const client = google.accounts.oauth2.initTokenClient({
+                    client_id: clientId,
+                    scope: 'https://www.googleapis.com/auth/calendar.readonly',
+                    callback: (resp) => {
+                        if (resp.error) return reject(new Error(resp.error_description || resp.error));
+                        gcal.token = resp.access_token;
+                        gcal.tokenExp = Date.now() + (Number(resp.expires_in) || 3600) * 1000;
+                        resolve(gcal.token);
+                    },
+                    error_callback: (err) => reject(new Error(err.message || err.type || 'ยกเลิกการเชื่อมต่อ'))
+                });
+                client.requestAccessToken();
+            });
+        }
+
+        async function gcalApi(url, clientId) {
+            const token = await gcalGetToken(clientId);
+            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.status === 401) { gcal.token = null; throw new Error('สิทธิ์หมดอายุ กรุณากดเชื่อมต่อใหม่'); }
+            if (!res.ok) {
+                const j = await res.json().catch(() => ({}));
+                throw new Error((j.error && j.error.message) || `Google API ผิดพลาด (${res.status})`);
+            }
+            return res.json();
+        }
+
+        async function gcalConnect() {
+            const clientId = document.getElementById('gcal-client-id').value.trim();
+            if (!clientId) return gcalSetStatus('กรุณาใส่ Client ID ก่อน', true);
+            gcalSaveSettings({ clientId });
+            try {
+                gcalSetStatus('กำลังเชื่อมต่อ...');
+                const data = await gcalApi('https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader', clientId);
+                gcal.calendars = data.items || [];
+                const sel = document.getElementById('gcal-calendar');
+                sel.innerHTML = '';
+                gcal.calendars.forEach(c => sel.add(new Option(c.summaryOverride || c.summary || c.id, c.id)));
+                const saved = gcalSettings().calendarId;
+                const primary = gcal.calendars.find(c => c.primary);
+                sel.value = gcal.calendars.some(c => c.id === saved) ? saved : (primary ? primary.id : sel.value);
+                document.getElementById('gcal-pull').disabled = gcal.calendars.length === 0;
+                gcalSetStatus(`เชื่อมต่อแล้ว พบ ${gcal.calendars.length} ปฏิทิน`);
+            } catch (err) {
+                gcalSetStatus(err.message, true);
+            }
+        }
+
+        async function gcalPull() {
+            if (state.locked) { notifyLocked(); return; }
+            const clientId = document.getElementById('gcal-client-id').value.trim();
+            const calId = document.getElementById('gcal-calendar').value;
+            if (!clientId || !calId) return gcalSetStatus('กรุณาเชื่อมต่อและเลือกปฏิทินก่อน', true);
+            gcalSaveSettings({ clientId, calendarId: calId });
+            const cal = gcal.calendars.find(c => c.id === calId);
+            const calName = gcalClean((cal && (cal.summaryOverride || cal.summary)) || calId);
+            const startKey = windowStartKey(), endKey = windowEndKey();
+            const toDate = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+            const timeMin = toDate(startKey).toISOString();
+            const timeMax = toDate(shiftDateKey(endKey, 1)).toISOString();
+            try {
+                gcalSetStatus('กำลังดึงอีเวนท์...');
+                const items = [];
+                let pageToken = '';
+                do {
+                    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?singleEvents=true&orderBy=startTime&maxResults=2500&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}` + (pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '');
+                    const data = await gcalApi(url, clientId);
+                    items.push(...(data.items || []));
+                    pageToken = data.nextPageToken || '';
+                } while (pageToken);
+
+                saveUndoState();
+                let layer = state.layers.find(l => l.gcalCalendarId === calId);
+                if (!layer) {
+                    layer = { id: `track-gcal-${Date.now()}`, name: calName, icon: 'fa-calendar-days', color: 'border-blue-500 text-blue-400', gcalCalendarId: calId };
+                    state.layers.push(layer);
+                }
+                // แทนที่อีเวนท์ที่เคยซิงค์จากปฏิทินนี้ (อีเวนท์ที่สร้างเองไม่ถูกแตะ)
+                state.events = state.events.filter(e => !(e.source === 'gcal' && e.gcalCalendarId === calId));
+
+                let added = 0, allDay = 0;
+                items.forEach(it => {
+                    if (it.status === 'cancelled') return;
+                    if (!it.start || !it.start.dateTime || !it.end || !it.end.dateTime) { allDay++; return; }
+                    const s0 = new Date(it.start.dateTime), e0 = new Date(it.end.dateTime);
+                    if (!(e0 > s0)) return;
+                    let day = new Date(s0.getFullYear(), s0.getMonth(), s0.getDate());
+                    while (day < e0) {
+                        const next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
+                        const segS = s0 > day ? s0 : day, segE = e0 < next ? e0 : next;
+                        const key = dateKey(day);
+                        if (key >= startKey && key <= endKey) {
+                            state.events.push(clampEventToDay({
+                                id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
+                                source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
+                                label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
+                                detail: gcalClean(it.location),
+                                comment: gcalClean(it.description).slice(0, 500),
+                                showTime: true,
+                                start: Math.round((segS - day) / 1000),
+                                duration: Math.max(1, Math.round((segE - segS) / 1000)),
+                                color: layer.color, alert: 30
+                            }));
+                            added++;
+                        }
+                        day = next;
+                    }
+                });
+                renderTimeline();
+                const msg = `ดึงสำเร็จ ${added} รายการ` + (allDay ? ` (ข้ามอีเวนท์ทั้งวัน ${allDay} รายการ)` : '');
+                gcalSetStatus(msg);
+                showToast(msg, 'emerald');
+            } catch (err) {
+                gcalSetStatus(err.message, true);
+            }
+        }
+
+        function gcalInitUI() {
+            document.body.insertAdjacentHTML('beforeend', `
+            <div id="gcal-modal" class="hidden fixed inset-0 z-[60] bg-black/70 items-center justify-center p-4">
+                <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-full max-w-md space-y-3 text-slate-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-base"><i class="fa-brands fa-google text-sky-400 mr-2"></i>ซิงค์ Google Calendar</h3>
+                        <button id="gcal-close" class="text-slate-400 hover:text-white px-2"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <label class="block text-xs text-slate-400">Google OAuth Client ID (เก็บในเบราว์เซอร์นี้เท่านั้น)</label>
+                    <input id="gcal-client-id" type="text" placeholder="xxxx.apps.googleusercontent.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-500">
+                    <button id="gcal-connect" class="w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-medium transition">เชื่อมต่อ / โหลดรายการปฏิทิน</button>
+                    <label class="block text-xs text-slate-400">ปฏิทินที่ต้องการดึง</label>
+                    <select id="gcal-calendar" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"></select>
+                    <p id="gcal-range" class="text-xs text-slate-500"></p>
+                    <button id="gcal-pull" disabled class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-lg text-sm font-semibold transition">ดึงอีเวนท์เข้าไทม์ไลน์</button>
+                    <div id="gcal-status" class="text-[13px] min-h-[20px] text-slate-400"></div>
+                </div>
+            </div>`);
+            const modal = document.getElementById('gcal-modal');
+            const setOpen = (open) => { modal.classList.toggle('hidden', !open); modal.classList.toggle('flex', open); };
+            document.getElementById('btn-gcal').addEventListener('click', () => {
+                document.getElementById('gcal-client-id').value = gcalSettings().clientId || '';
+                document.getElementById('gcal-range').textContent = `ช่วงที่ดึง: ${windowStartKey()} ถึง ${windowEndKey()} • ข้ามอีเวนท์ทั้งวัน • อีเวนท์ที่ซิงค์จากปฏิทินนี้จะถูกแทนที่ทุกครั้งที่ดึง`;
+                setOpen(true);
+                gcalLoadGis().catch(() => {});
+            });
+            document.getElementById('gcal-close').addEventListener('click', () => setOpen(false));
+            modal.addEventListener('click', (e) => { if (e.target === modal) setOpen(false); });
+            document.getElementById('gcal-connect').addEventListener('click', gcalConnect);
+            document.getElementById('gcal-pull').addEventListener('click', gcalPull);
+        }
+
         function initPersistence() {
             initToolsToggle();
             initLock();
+            gcalInitUI();
             state.todayKey = dateKey(new Date());
             state.viewDate = state.todayKey;
             loadFromStorage();
@@ -1468,6 +1649,8 @@
                 state.events.push({
                     ...ev,
                     id: newId,
+                    source: undefined,
+                    gcalCalendarId: undefined,
                     date: state.viewDate,
                     layerId: newLayer ? newLayer.id : layerId,
                     start: ev.start,
@@ -1662,6 +1845,8 @@
             const eventData = {
                 id: id || `evt-${Date.now()}`,
                 date: (existingEvt && existingEvt.date) || state.viewDate,
+                source: existingEvt ? existingEvt.source : undefined,
+                gcalCalendarId: existingEvt ? existingEvt.gcalCalendarId : undefined,
                 layerId: document.getElementById('event-layer').value,
                 label: document.getElementById('event-label').value,
                 detail: elements.eventDetail.value,
