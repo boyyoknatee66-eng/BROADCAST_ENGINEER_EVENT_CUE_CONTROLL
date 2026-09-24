@@ -100,6 +100,40 @@
         #ruler-container:active {
             cursor: grabbing;
         }
+        #event-tooltip {
+            position: fixed;
+            z-index: 60;
+            max-width: 260px;
+            pointer-events: none;
+            background: #0f172a;
+            color: #f1f5f9;
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            line-height: 1.45;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, -100%) translateY(-10px) scale(0.96);
+            transition: opacity 0.12s ease, transform 0.12s ease;
+        }
+        #event-tooltip.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -100%) translateY(-10px) scale(1);
+        }
+        #event-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+            filter: drop-shadow(0 2px 1px rgba(0,0,0,0.3));
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-sm">
@@ -130,6 +164,16 @@
             <button id="btn-go-now" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md font-bold text-xs transition shadow-md shadow-emerald-600/30" title="Center timeline to current time">
                 Now
             </button>
+
+            <div class="h-8 w-px bg-slate-800"></div>
+
+            <div class="flex items-center space-x-1.5">
+                <label for="goto-timecode" class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Go to</label>
+                <input type="text" id="goto-timecode" placeholder="HH:MM" maxlength="5" class="w-16 bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-center text-amber-400 font-mono font-bold text-xs focus:outline-none focus:border-blue-500" title="กรอกเวลา เช่น 15:54 หรือ 1554 แล้วกด Enter">
+                <button id="btn-goto-time" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md font-bold text-xs transition" title="เลื่อนไทม์ไลน์ไปยังเวลาที่ระบุ">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Control Action Tools -->
@@ -203,7 +247,7 @@
 
             <!-- Scrollable Multi-Layer Event Canvas -->
             <div id="timeline-scroll-area" class="flex-1 overflow-x-hidden overflow-y-auto relative timeline-grid select-none">
-                <div id="layers-container" class="min-w-full divide-y divide-slate-800/40 pb-20">
+                <div id="layers-container" class="min-w-full divide-y divide-slate-800/40">
                     <!-- Dynamic Tracks and Visual Event Clips -->
                 </div>
             </div>
@@ -245,6 +289,9 @@
     <!-- Toast Notification Overlay -->
     <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
+    <!-- Floating Comment Tooltip (Banner) -->
+    <div id="event-tooltip"></div>
+
     <!-- Modal: Add / Edit Broadcast Event -->
     <div id="event-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center hidden">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 text-slate-200">
@@ -273,6 +320,13 @@
                     <input type="text" id="event-detail" placeholder="เช่น ถ่ายทอดสด Asian Game" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
 
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-comment-dots text-sky-400"></i> คอมเมนต์ <span class="text-slate-500 font-normal">(แสดงเมื่อเอาเมาส์ไปชี้บนอีเวนท์)</span>
+                    </label>
+                    <textarea id="event-comment" rows="2" placeholder="เช่น รอคอนเฟิร์มลำดับผังจากฝ่ายข่าวอีกครั้ง" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                </div>
+
                 <!-- Start Time & End Time (HH:MM) Inputs -->
                 <div class="grid grid-cols-2 gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
                     <div>
@@ -288,6 +342,11 @@
                         </label>
                         <input type="text" id="event-end-timecode" required placeholder="1830 หรือ 18:30" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-blue-500">
                     </div>
+
+                    <label class="col-span-2 flex items-center gap-2 pt-1 cursor-pointer select-none">
+                        <input type="checkbox" id="event-show-time" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer">
+                        <span class="text-xs font-medium text-slate-300">แสดงเวลาบนอีเวนท์ (Start - End) บนแท่งไทม์ไลน์</span>
+                    </label>
                 </div>
 
                 <div>
@@ -298,7 +357,9 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">สีสัญลักษณ์</label>
-                        <select id="event-color" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+
+                        <!-- Real value holder (kept for existing JS: .value get/set) -->
+                        <select id="event-color" class="hidden">
                             <option value="emerald">เขียวมรกต (TV Live)</option>
                             <option value="amber">ส้มอำพัน (Satellite)</option>
                             <option value="blue">ฟ้าอีเลกทริก (Web/App)</option>
@@ -306,7 +367,29 @@
                             <option value="rose">แดงกู้ภัย (Emergency)</option>
                             <option value="cyan">ฟ้าใส (Live Stream)</option>
                             <option value="yellow">เหลืองทอง (Special)</option>
+                            <option value="red">แดง</option>
+                            <option value="orange">ส้ม</option>
+                            <option value="lime">เขียวมะนาว</option>
+                            <option value="green">เขียว</option>
+                            <option value="teal">เขียวอมฟ้า</option>
+                            <option value="sky">ฟ้าสดใส</option>
+                            <option value="indigo">น้ำเงินอมม่วง</option>
+                            <option value="violet">ม่วง</option>
+                            <option value="fuchsia">ชมพูอมม่วง</option>
+                            <option value="pink">ชมพู</option>
                         </select>
+
+                        <!-- Custom dropdown UI with a small color swatch square before each label -->
+                        <div class="relative">
+                            <button type="button" id="event-color-trigger" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white flex items-center justify-between gap-2 focus:outline-none focus:border-blue-500">
+                                <span class="flex items-center gap-2 overflow-hidden">
+                                    <span id="event-color-swatch" class="w-3.5 h-3.5 rounded-sm border border-white/25 shrink-0"></span>
+                                    <span id="event-color-label" class="truncate text-sm"></span>
+                                </span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-500 shrink-0"></i>
+                            </button>
+                            <div id="event-color-options" class="hidden absolute z-30 bottom-full mb-1 w-full max-h-64 overflow-y-auto bg-slate-950 border border-slate-700 rounded-lg shadow-2xl py-1"></div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">เตือนล่วงหน้า (Pre-Cue)</label>
@@ -435,6 +518,7 @@
             wallClock: document.getElementById('wall-clock'),
             playhead: document.getElementById('playhead'),
             layerHeadersContainer: document.getElementById('layer-headers-container'),
+            timelineScrollArea: document.getElementById('timeline-scroll-area'),
             layersContainer: document.getElementById('layers-container'),
             rulerTicks: document.getElementById('ruler-ticks'),
             rulerContainer: document.getElementById('ruler-container'),
@@ -448,8 +532,16 @@
             btnDeleteEvent: document.getElementById('btn-delete-event'),
             eventStartTimecode: document.getElementById('event-start-timecode'),
             eventEndTimecode: document.getElementById('event-end-timecode'),
+            eventShowTime: document.getElementById('event-show-time'),
             eventDuration: document.getElementById('event-duration'),
             eventDetail: document.getElementById('event-detail'),
+            eventComment: document.getElementById('event-comment'),
+            eventTooltip: document.getElementById('event-tooltip'),
+            eventColorSelect: document.getElementById('event-color'),
+            eventColorTrigger: document.getElementById('event-color-trigger'),
+            eventColorSwatch: document.getElementById('event-color-swatch'),
+            eventColorLabel: document.getElementById('event-color-label'),
+            eventColorOptions: document.getElementById('event-color-options'),
 
             // Layer Settings Modal Elements
             layerModal: document.getElementById('layer-modal'),
@@ -467,6 +559,8 @@
             btnAddLayer: document.getElementById('btn-add-layer'),
             btnExport: document.getElementById('btn-export'),
             btnGoNow: document.getElementById('btn-go-now'),
+            gotoTimecode: document.getElementById('goto-timecode'),
+            btnGotoTime: document.getElementById('btn-goto-time'),
             btnCopyTimeline: document.getElementById('btn-copy-timeline'),
             btnPasteTimeline: document.getElementById('btn-paste-timeline'),
             btnUndo: document.getElementById('btn-undo'),
@@ -551,7 +645,17 @@
             purple: { bg: 'bg-purple-600/80', border: 'border-purple-400', text: 'text-purple-100' },
             rose: { bg: 'bg-rose-600/80', border: 'border-rose-400', text: 'text-rose-100' },
             cyan: { bg: 'bg-cyan-600/80', border: 'border-cyan-400', text: 'text-cyan-100' },
-            yellow: { bg: 'bg-yellow-600/80', border: 'border-yellow-400', text: 'text-yellow-100' }
+            yellow: { bg: 'bg-yellow-600/80', border: 'border-yellow-400', text: 'text-yellow-100' },
+            red: { bg: 'bg-red-600/80', border: 'border-red-400', text: 'text-red-100' },
+            orange: { bg: 'bg-orange-600/80', border: 'border-orange-400', text: 'text-orange-100' },
+            lime: { bg: 'bg-lime-600/80', border: 'border-lime-400', text: 'text-lime-100' },
+            green: { bg: 'bg-green-600/80', border: 'border-green-400', text: 'text-green-100' },
+            teal: { bg: 'bg-teal-600/80', border: 'border-teal-400', text: 'text-teal-100' },
+            sky: { bg: 'bg-sky-600/80', border: 'border-sky-400', text: 'text-sky-100' },
+            indigo: { bg: 'bg-indigo-600/80', border: 'border-indigo-400', text: 'text-indigo-100' },
+            violet: { bg: 'bg-violet-600/80', border: 'border-violet-400', text: 'text-violet-100' },
+            fuchsia: { bg: 'bg-fuchsia-600/80', border: 'border-fuchsia-400', text: 'text-fuchsia-100' },
+            pink: { bg: 'bg-pink-600/80', border: 'border-pink-400', text: 'text-pink-100' }
         };
 
         function renderTimeline() {
@@ -670,10 +774,6 @@
             const widthPx = Math.max(12, evt.duration * state.pxPerSecond);
             const startTimeStr = secondsToTimecode(evt.start);
             const endTimeStr = secondsToTimecode(evt.start + evt.duration);
-            const durH = Math.floor(evt.duration / 3600);
-            const durM = Math.floor((evt.duration % 3600) / 60);
-            const durStr = durH > 0 ? `${durH}h${String(durM).padStart(2, '0')}m` : `${durM}m`;
-
             const clip = document.createElement('div');
             clip.id = evt.id;
             clip.className = `absolute top-2.5 h-11 rounded-lg ${colors.bg} border ${colors.border} ${colors.text} cursor-pointer clip-glow shadow-md select-none group overflow-hidden`;
@@ -684,19 +784,38 @@
             const isUltraCompact = widthPx < 35;
 
             clip.innerHTML = `
-                <div class="clip-label-sticky absolute inset-y-0 left-0 flex items-center space-x-2 overflow-hidden pointer-events-none px-2.5 max-w-full" style="will-change: transform; white-space: nowrap;">
+                <div class="clip-label-sticky absolute inset-y-0 left-0 flex items-center space-x-2 overflow-hidden pointer-events-none px-2.5 max-w-full">
                     ${!isUltraCompact ? `
                     <div class="w-4 h-4 rounded-full bg-slate-900/40 border border-white/30 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-play text-[8px] text-emerald-300"></i>
                     </div>` : ''}
                     <div class="truncate">
                         ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.label}${evt.detail ? ' <span class="font-normal text-[12px] opacity-80 normal-case">' + evt.detail + '</span>' : ''}</div>` : ''}
-                        ${!isVeryCompact ? `<div class="text-[12px] opacity-90 font-mono">${startTimeStr} - ${endTimeStr}</div>` : ''}
+                        ${!isVeryCompact && evt.showTime !== false ? `<div class="text-[12px] opacity-90 font-mono">${startTimeStr} - ${endTimeStr}</div>` : ''}
                     </div>
                 </div>
 
                 <div class="resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/40 rounded-r-lg"></div>
+
+                ${evt.comment && evt.comment.trim() ? `
+                <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-sky-500 flex items-center justify-center shadow ring-1 ring-slate-950/60 pointer-events-none z-10">
+                    <i class="fa-solid fa-comment text-[7px] text-white"></i>
+                </div>` : ''}
             `;
+
+            clip.addEventListener('mouseenter', (e) => {
+                if (evt.comment && evt.comment.trim()) {
+                    showEventTooltip(evt, e);
+                }
+            });
+            clip.addEventListener('mousemove', (e) => {
+                if (evt.comment && evt.comment.trim()) {
+                    positionEventTooltip(e);
+                }
+            });
+            clip.addEventListener('mouseleave', () => {
+                hideEventTooltip();
+            });
 
             clip.addEventListener('click', (e) => {
                 if (e.target.classList.contains('resize-handle')) return;
@@ -729,6 +848,86 @@
 
             return clip;
         }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showEventTooltip(evt, e) {
+            elements.eventTooltip.innerHTML = `
+                <div class="text-slate-100 text-[12px] whitespace-pre-wrap break-words">${escapeHtml(evt.comment)}</div>
+            `;
+            elements.eventTooltip.classList.add('visible');
+            positionEventTooltip(e);
+        }
+
+        function positionEventTooltip(e) {
+            const margin = 12;
+            let x = e.clientX;
+            let y = e.clientY - 14;
+
+            const tipWidth = elements.eventTooltip.offsetWidth || 260;
+            x = Math.min(Math.max(x, margin + tipWidth / 2), window.innerWidth - margin - tipWidth / 2);
+            y = Math.max(y, 60);
+
+            elements.eventTooltip.style.left = `${x}px`;
+            elements.eventTooltip.style.top = `${y}px`;
+        }
+
+        function hideEventTooltip() {
+            elements.eventTooltip.classList.remove('visible');
+        }
+
+        // --- Custom "สีสัญลักษณ์" dropdown with a small color-swatch square before each label ---
+        function initEventColorPicker() {
+            const options = Array.from(elements.eventColorSelect.options).map(opt => ({
+                value: opt.value,
+                label: opt.textContent
+            }));
+
+            elements.eventColorOptions.innerHTML = options.map(opt => `
+                <button type="button" data-color-value="${opt.value}" class="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800 text-left transition">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-${opt.value}-500 border border-white/25 shrink-0"></span>
+                    <span class="truncate">${opt.label}</span>
+                </button>
+            `).join('');
+
+            elements.eventColorOptions.querySelectorAll('button[data-color-value]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.eventColorSelect.value = btn.dataset.colorValue;
+                    syncEventColorTrigger();
+                    closeEventColorOptions();
+                });
+            });
+
+            elements.eventColorTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                elements.eventColorOptions.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!elements.eventColorOptions.contains(e.target) && e.target !== elements.eventColorTrigger) {
+                    closeEventColorOptions();
+                }
+            });
+
+            syncEventColorTrigger();
+        }
+
+        function closeEventColorOptions() {
+            elements.eventColorOptions.classList.add('hidden');
+        }
+
+        function syncEventColorTrigger() {
+            const value = elements.eventColorSelect.value;
+            const selectedOpt = elements.eventColorSelect.querySelector(`option[value="${value}"]`);
+            elements.eventColorSwatch.className = `w-3.5 h-3.5 rounded-sm bg-${value}-500 border border-white/25 shrink-0`;
+            elements.eventColorLabel.textContent = selectedOpt ? selectedOpt.textContent : value;
+        }
+
+        initEventColorPicker();
 
         function renderRuler(totalWidth) {
             elements.rulerTicks.innerHTML = '';
@@ -833,39 +1032,34 @@
             requestAnimationFrame(animationLoop);
         }
 
-        function keepClipLabelVisible(clipEl, scrollX, viewportWidth) {
-            const labelEl = clipEl.querySelector('.clip-label-sticky');
-            if (!labelEl) return;
-            const leftPx = parseFloat(clipEl.style.left) || 0;
-            const widthPx = parseFloat(clipEl.style.width) || 0;
-            const clipLeftInViewport = scrollX + leftPx;
-            const clipRightInViewport = clipLeftInViewport + widthPx;
-            const reservedRight = 28;
-            const maxOffset = Math.max(0, widthPx - reservedRight);
-            let offset = Math.max(0, -clipLeftInViewport);
-            offset = Math.min(offset, maxOffset);
-            const isFullyOffscreen = clipRightInViewport < 0 || clipLeftInViewport > viewportWidth;
-            if (isFullyOffscreen) {
-                labelEl.style.opacity = '0';
-            } else {
-                labelEl.style.opacity = '1';
-                labelEl.style.transform = `translateX(${offset}px)`;
-            }
-        }
-
         function updatePositions() {
             const centerOffsetX = getCenterOffset();
             const scrollX = centerOffsetX - (state.currentSystemSeconds * state.pxPerSecond) + state.userOffsetPx;
-            const viewportWidth = getViewportWidth();
 
             elements.rulerTicks.style.transform = `translateX(${scrollX}px)`;
             elements.layersContainer.style.transform = `translateX(${scrollX}px)`;
             elements.playhead.style.transform = `translateX(calc(-50% + ${state.userOffsetPx}px))`;
 
+            // Keep the layer-name sidebar's vertical scroll in lockstep with the canvas,
+            // every animation frame (not just on the 'scroll' event, which lags one frame
+            // behind during active wheel scrolling). Synced by ratio rather than raw pixel
+            // value so the TOP and BOTTOM always line up exactly even if the two columns'
+            // total scrollable heights differ slightly (e.g. from padding or borders).
+            const maxTimelineScroll = elements.timelineScrollArea.scrollHeight - elements.timelineScrollArea.clientHeight;
+            const maxHeaderScroll = elements.layerHeadersContainer.scrollHeight - elements.layerHeadersContainer.clientHeight;
+            const desiredHeaderScroll = maxTimelineScroll > 0
+                ? (elements.timelineScrollArea.scrollTop / maxTimelineScroll) * maxHeaderScroll
+                : 0;
+            if (Math.abs(elements.layerHeadersContainer.scrollTop - desiredHeaderScroll) > 0.5) {
+                elements.layerHeadersContainer.scrollTop = desiredHeaderScroll;
+            }
+
+            const viewportWidth = getViewportWidth();
+
             state.events.forEach(evt => {
                 const clipEl = document.getElementById(evt.id);
                 if (!clipEl) return;
-
+                
                 const isCrossing = state.currentSystemSeconds >= evt.start && state.currentSystemSeconds <= (evt.start + evt.duration);
                 if (isCrossing) {
                     clipEl.classList.add('clip-active-now');
@@ -875,6 +1069,38 @@
 
                 keepClipLabelVisible(clipEl, scrollX, viewportWidth);
             });
+        }
+
+        // Keeps the event name/detail label visible inside the viewport even when
+        // the timeline is scrolled so that only the middle (or end) of a long
+        // event clip is in view -- mirrors the "sticky clip name" behaviour of
+        // professional NLE/CG timelines (Premiere, Smartsheet Gantt, etc.).
+        function keepClipLabelVisible(clipEl, scrollX, viewportWidth) {
+            const labelEl = clipEl.querySelector('.clip-label-sticky');
+            if (!labelEl) return;
+
+            const leftPx = parseFloat(clipEl.style.left) || 0;
+            const widthPx = parseFloat(clipEl.style.width) || 0;
+
+            // Clip's rendered edges relative to the visible viewport (0 = left edge of canvas).
+            const clipLeftInViewport = scrollX + leftPx;
+            const clipRightInViewport = clipLeftInViewport + widthPx;
+
+            // Reserve room on the right so the label never overlaps the duration
+            // badge / resize handle when it's pinned near the clip's end.
+            const reservedRight = 28;
+            const maxOffset = Math.max(0, widthPx - reservedRight);
+
+            // How far (in px, local to the clip) the viewport's left edge has
+            // crept into the clip. 0 while the clip's own left edge is still visible.
+            let offset = Math.max(0, -clipLeftInViewport);
+            offset = Math.min(offset, maxOffset);
+
+            // If the clip has scrolled entirely out of view, no need to move it further.
+            const isFullyOffscreen = clipRightInViewport < 0 || clipLeftInViewport > viewportWidth;
+            if (!isFullyOffscreen) {
+                labelEl.style.transform = `translateX(${offset}px)`;
+            }
         }
 
         function checkAlertCues() {
@@ -1158,13 +1384,16 @@
                 document.getElementById('event-layer').value = evt.layerId;
                 document.getElementById('event-label').value = evt.label;
                 elements.eventDetail.value = evt.detail || '';
+                elements.eventComment.value = evt.comment || '';
                 
                 elements.eventStartTimecode.value = secondsToTimecode(evt.start);
                 elements.eventEndTimecode.value = secondsToTimecode(evt.start + evt.duration);
                 elements.eventDuration.value = evt.duration;
+                elements.eventShowTime.checked = evt.showTime !== false;
 
                 document.getElementById('event-color').value = evt.color;
                 document.getElementById('event-alert').value = evt.alert;
+                syncEventColorTrigger();
                 elements.btnDeleteEvent.classList.remove('hidden');
             } else {
                 document.getElementById('modal-title').textContent = 'เพิ่มรายการออกอากาศใหม่';
@@ -1178,6 +1407,8 @@
                 elements.eventStartTimecode.value = secondsToTimecode(startSec);
                 elements.eventEndTimecode.value = secondsToTimecode(startSec + duration);
                 elements.eventDuration.value = duration;
+                elements.eventShowTime.checked = true;
+                syncEventColorTrigger();
 
                 elements.btnDeleteEvent.classList.add('hidden');
             }
@@ -1230,6 +1461,8 @@
                 layerId: document.getElementById('event-layer').value,
                 label: document.getElementById('event-label').value,
                 detail: elements.eventDetail.value,
+                comment: elements.eventComment.value,
+                showTime: elements.eventShowTime.checked,
                 start: startSec,
                 duration: duration,
                 color: document.getElementById('event-color').value,
@@ -1315,9 +1548,46 @@
         elements.btnAddClip.addEventListener('click', () => openEventModal());
         elements.btnAddLayer.addEventListener('click', () => openLayerModal());
 
+        // Keep the layer-name sidebar's vertical scroll perfectly in sync with the
+        // event canvas. The sidebar has no scrollbar of its own (overflow-y-hidden)
+        // so its scrollTop is driven programmatically here whenever the canvas scrolls,
+        // preventing the two columns from drifting apart when there are many/mixed-height layers.
+        // Note: vertical sidebar scroll sync now happens every animation frame inside
+        // updatePositions() (ratio-based), so no separate 'scroll' listener is needed here.
+
+        // The header column itself has no scrollbar (overflow-y-hidden), so mouse-wheel
+        // scrolling while hovering over the layer names wouldn't do anything on its own.
+        // Forward that wheel input to the real scroll container instead.
+        elements.layerHeadersContainer.addEventListener('wheel', (e) => {
+            elements.timelineScrollArea.scrollTop += e.deltaY;
+            e.preventDefault();
+        }, { passive: false });
+
         elements.btnGoNow.addEventListener('click', () => {
             state.userOffsetPx = 0;
             updatePositions();
+        });
+
+        function jumpToTypedTime() {
+            const raw = elements.gotoTimecode.value.trim();
+            if (!raw) return;
+            const targetSeconds = timecodeToSeconds(raw);
+            elements.gotoTimecode.value = secondsToTimecode(targetSeconds);
+            state.userOffsetPx = (state.currentSystemSeconds - targetSeconds) * state.pxPerSecond;
+            updatePositions();
+        }
+
+        elements.btnGotoTime.addEventListener('click', jumpToTypedTime);
+        elements.gotoTimecode.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                jumpToTypedTime();
+            }
+        });
+        elements.gotoTimecode.addEventListener('blur', () => {
+            const raw = elements.gotoTimecode.value.trim();
+            if (!raw) return;
+            elements.gotoTimecode.value = secondsToTimecode(timecodeToSeconds(raw));
         });
 
         function saveUndoState() {
