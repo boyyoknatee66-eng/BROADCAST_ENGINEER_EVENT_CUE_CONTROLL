@@ -21,6 +21,8 @@
             font-family: 'JetBrains Mono', monospace;
         }
         input[type="date"] { color-scheme: dark; }
+        .is-locked .clip-glow { cursor: default !important; }
+        .is-locked .resize-handle { pointer-events: none; }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -184,7 +186,6 @@
                 <input type="date" id="view-date" class="bg-slate-800 text-slate-200 border border-slate-700 rounded-lg px-2 py-1 text-[15px] font-mono" title="เลือกวันที่ (เก็บข้อมูล 3 เดือน)">
                 <button id="btn-date-next" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="วันถัดไป"><i class="fa-solid fa-chevron-right"></i></button>
                 <button id="btn-date-today" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition">วันนี้</button>
-                <span id="date-badge"></span>
                 <span id="save-status" class="text-[11px] text-slate-500 font-mono hidden lg:inline"></span>
             </div>
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
@@ -193,10 +194,13 @@
             </button>
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
             <button id="btn-tools-toggle" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="ซ่อน/แสดงเครื่องมือแก้ไข" aria-expanded="false">
-                <i class="fa-solid fa-screwdriver-wrench text-slate-400"></i> <span id="tools-toggle-text">แสดงเครื่องมือ</span>
+                <i class="fa-solid fa-screwdriver-wrench text-slate-400"></i> <span id="tools-toggle-text">แสดงเครื่องมือ</span> <i id="tools-lock-indicator" class="fa-solid fa-lock text-red-400 text-xs hidden"></i>
             </button>
             <div id="edit-tools" class="hidden items-center space-x-2">
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
+            <button id="btn-lock-edit" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="กดเพื่อสลับ: ห้ามแก้ไข / แก้ไขได้ (ทุกอีเวนท์ ทุกเลเยอร์)">
+                <i id="lock-icon" class="fa-solid fa-lock-open text-emerald-400"></i> <span id="lock-text">แก้ไขได้</span>
+            </button>
             <button id="btn-add-layer" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5">
                 <i class="fa-solid fa-layer-group text-blue-400"></i> เพิ่มเลเยอร์
             </button>
@@ -272,21 +276,8 @@
 
     <!-- Footer Status & Time Range Controls Bar -->
     <footer class="bg-slate-900 border-t border-slate-800 px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 z-30">
-        <!-- Live Status Indicators -->
-        <div class="flex items-center space-x-3 text-xs text-slate-400">
-            <span class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> กำลังออกอากาศ (On Air)
-            </span>
-            <span class="flex items-center gap-1.5 ml-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> เตือนเตรียมคิว (Pre-Cue)
-            </span>
-            <span class="flex items-center gap-1.5 ml-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block"></span> รอคิว (Standby)
-            </span>
-        </div>
-
         <!-- Time Window Presets (30m, 1h, 3h, 6h, 12h, 24h, 48h) -->
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 ml-auto">
             <span class="text-xs font-semibold text-slate-300 mr-1 flex items-center gap-1.5">
                 <i class="fa-solid fa-down-left-and-up-right-to-center text-blue-400 text-xs"></i> ช่วงมุมมองไทม์ไลน์:
             </span>
@@ -597,7 +588,6 @@
             prev: document.getElementById('btn-date-prev'),
             next: document.getElementById('btn-date-next'),
             today: document.getElementById('btn-date-today'),
-            badge: document.getElementById('date-badge'),
             status: document.getElementById('save-status')
         };
         let lastSavedBody = '';
@@ -669,12 +659,6 @@
             dateUI.input.value = state.viewDate;
             dateUI.prev.disabled = state.viewDate <= min;
             dateUI.next.disabled = state.viewDate >= max;
-            const isToday = state.viewDate === state.todayKey;
-            // ป้ายแสดงเฉพาะตอนดูวันอื่น (วันนี้ไม่แสดง)
-            dateUI.badge.textContent = isToday ? '' : 'ไม่ใช่วันนี้ • ไม่มีเสียงเตือน';
-            dateUI.badge.className = isToday
-                ? 'hidden'
-                : 'text-[11px] px-2 py-1 rounded-md font-medium border bg-amber-500/15 text-amber-400 border-amber-500/30';
         }
 
         function setViewDate(key) {
@@ -724,8 +708,46 @@
             });
         }
 
+        const LOCK_KEY = 'broadcast-cue-locked';
+        const LOCK_GUARDED_IDS = ['btn-add-layer', 'btn-add-clip', 'btn-paste-timeline', 'btn-undo', 'btn-delete', 'btn-import-trigger'];
+
+        function notifyLocked() {
+            showToast('ล็อกอยู่: ห้ามแก้ไข (ปลดล็อกได้ที่ เครื่องมือ → แก้ไขได้)', 'amber');
+        }
+
+        function applyLock(locked) {
+            state.locked = locked;
+            if (locked && state.pasteMode) deactivatePasteMode();
+            document.body.classList.toggle('is-locked', locked);
+            LOCK_GUARDED_IDS.forEach(id => {
+                const b = document.getElementById(id);
+                if (!b) return;
+                b.disabled = locked;
+                b.style.opacity = locked ? '0.4' : '';
+                b.style.cursor = locked ? 'not-allowed' : '';
+            });
+            document.getElementById('lock-icon').className = locked ? 'fa-solid fa-lock text-red-400' : 'fa-solid fa-lock-open text-emerald-400';
+            const t = document.getElementById('lock-text');
+            t.textContent = locked ? 'ห้ามแก้ไข' : 'แก้ไขได้';
+            t.classList.toggle('text-red-400', locked);
+            document.getElementById('tools-lock-indicator').classList.toggle('hidden', !locked);
+        }
+
+        function initLock() {
+            let locked = false;
+            try { locked = localStorage.getItem(LOCK_KEY) === '1'; } catch (err) {}
+            applyLock(locked);
+            document.getElementById('btn-lock-edit').addEventListener('click', () => {
+                locked = !locked;
+                applyLock(locked);
+                try { localStorage.setItem(LOCK_KEY, locked ? '1' : '0'); } catch (err) {}
+                showToast(locked ? 'ล็อกแล้ว: ห้ามแก้ไขทุกอีเวนท์ ทุกเลเยอร์' : 'ปลดล็อกแล้ว: แก้ไขได้', locked ? 'red' : 'emerald');
+            });
+        }
+
         function initPersistence() {
             initToolsToggle();
+            initLock();
             state.todayKey = dateKey(new Date());
             state.viewDate = state.todayKey;
             loadFromStorage();
@@ -853,6 +875,7 @@
 
                 // Drag Events for Reorder
                 headerEl.addEventListener('dragstart', (e) => {
+                    if (state.locked) { e.preventDefault(); return; }
                     e.dataTransfer.setData('text/plain', layer.id);
                     e.dataTransfer.effectAllowed = 'move';
                     headerEl.classList.add('opacity-40');
@@ -885,6 +908,7 @@
 
                 headerEl.addEventListener('drop', (e) => {
                     e.preventDefault();
+                    if (state.locked) return;
                     headerEl.classList.remove('drag-over-top', 'drag-over-bottom');
                     const fromId = e.dataTransfer.getData('text/plain');
                     const toId = layer.id;
@@ -1142,6 +1166,7 @@
             let hasDragged = false;
 
             element.addEventListener('mousedown', (e) => {
+                if (state.locked) return;
                 if (e.target.classList.contains('resize-handle')) {
                     isResizing = true;
                 } else {
@@ -1385,6 +1410,7 @@
         }
 
         function activatePasteMode() {
+            if (state.locked) { notifyLocked(); return; }
             if (state.selectedEvents.size === 0 && state.events.length > 0 && !(state._pasteData && state._pasteData.events && state._pasteData.events.length)) {
                 showToast('กรุณาเลือกอีเวนท์ก่อน Copy', 'amber');
                 return;
@@ -1479,6 +1505,7 @@
         }
 
         function openLayerModal(layer = null) {
+            if (state.locked) { notifyLocked(); return; }
             elements.layerModal.classList.remove('hidden');
 
             if (layer) {
@@ -1545,6 +1572,7 @@
         });
 
         function openEventModal(evt = null) {
+            if (state.locked) { notifyLocked(); return; }
             elements.eventModal.classList.remove('hidden');
             
             elements.eventModal.querySelector('#event-layer').innerHTML = state.layers.map(l => 
@@ -1775,6 +1803,7 @@
         }
 
         elements.btnUndo.addEventListener('click', () => {
+            if (state.locked) { notifyLocked(); return; }
             if (state.undoHistory.length === 0) {
                 showToast('ไม่มีอะไรให้ Undo', 'amber');
                 return;
@@ -1788,6 +1817,7 @@
         });
 
         elements.btnDelete.addEventListener('click', () => {
+            if (state.locked) { notifyLocked(); return; }
             if (state.selectedEvents.size === 0) {
                 showToast('กรุณาเลือกอีเวนท์ที่ต้องการลบ', 'amber');
                 return;
@@ -1805,6 +1835,7 @@
                 const tag = document.activeElement.tagName;
                 if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
                 if (state.pasteMode) return;
+                if (state.locked) { if (state.selectedEvents.size > 0) notifyLocked(); return; }
                 if (state.selectedEvents.size === 0) return;
                 e.preventDefault();
                 saveUndoState();
@@ -1882,7 +1913,7 @@
             } catch (err) {}
         });
 
-        elements.btnImportTrigger.addEventListener('click', () => elements.importFileInput.click());
+        elements.btnImportTrigger.addEventListener('click', () => { if (state.locked) { notifyLocked(); return; } elements.importFileInput.click(); });
         elements.importFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
