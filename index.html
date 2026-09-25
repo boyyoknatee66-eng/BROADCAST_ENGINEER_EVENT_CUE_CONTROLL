@@ -856,10 +856,31 @@
                 // แทนที่อีเวนท์ที่เคยซิงค์จากปฏิทินนี้ (อีเวนท์ที่สร้างเองไม่ถูกแตะ)
                 state.events = state.events.filter(e => !(e.source === 'gcal' && e.gcalCalendarId === calId));
 
-                let added = 0, allDay = 0;
+                let added = 0, addedAllDay = 0;
                 items.forEach(it => {
                     if (it.status === 'cancelled') return;
-                    if (!it.start || !it.start.dateTime || !it.end || !it.end.dateTime) { allDay++; return; }
+                    if (it.start && it.start.date && it.end && it.end.date) {
+                        // อีเวนท์ทั้งวัน: Google ให้มาเป็นวันที่ล้วน (ไม่มีเวลา/โซนเวลา) ใช้ค่าตรงตามนั้น
+                        let key = it.start.date;
+                        while (key < it.end.date) {
+                            if (key >= startKey && key <= endKey) {
+                                state.events.push({
+                                    id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
+                                    source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
+                                    label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
+                                    detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 300),
+                                    comment: it.location ? `สถานที่: ${gcalClean(it.location)}` : '',
+                                    allDay: true, showTime: false,
+                                    start: 0, duration: 86400,
+                                    color: layer.color, alert: 0
+                                });
+                                added++; addedAllDay++;
+                            }
+                            key = shiftDateKey(key, 1);
+                        }
+                        return;
+                    }
+                    if (!it.start || !it.start.dateTime || !it.end || !it.end.dateTime) return;
                     const s0 = new Date(it.start.dateTime), e0 = new Date(it.end.dateTime);
                     if (!(e0 > s0)) return;
                     let day = new Date(s0.getFullYear(), s0.getMonth(), s0.getDate());
@@ -872,8 +893,8 @@
                                 id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
                                 source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
                                 label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
-                                detail: gcalClean(it.location),
-                                comment: gcalClean(it.description).slice(0, 500),
+                                detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 300),
+                                comment: it.location ? `สถานที่: ${gcalClean(it.location)}` : '',
                                 showTime: true,
                                 start: Math.round((segS - day) / 1000),
                                 duration: Math.max(1, Math.round((segE - segS) / 1000)),
@@ -885,7 +906,7 @@
                     }
                 });
                 renderTimeline();
-                const msg = `ดึงสำเร็จ ${added} รายการ` + (allDay ? ` (ข้ามอีเวนท์ทั้งวัน ${allDay} รายการ)` : '');
+                const msg = `ดึงสำเร็จ ${added} รายการ` + (addedAllDay ? ` (ทั้งวัน ${addedAllDay} รายการ)` : '');
                 gcalSetStatus(msg);
                 showToast(msg, 'emerald');
             } catch (err) {
@@ -1147,7 +1168,7 @@
             const endTimeStr = secondsToTimecode(evt.start + evt.duration);
             const clip = document.createElement('div');
             clip.id = evt.id;
-            clip.className = `absolute top-2.5 h-11 rounded-lg ${colors.bg} border ${colors.border} ${colors.text} cursor-pointer clip-glow shadow-md select-none group overflow-hidden`;
+            clip.className = `absolute top-2.5 h-11 rounded-lg ${colors.bg} border ${colors.border} ${colors.text} cursor-pointer clip-glow shadow-md select-none group overflow-hidden` + (evt.allDay ? ' ring-2 ring-white/25' : '');
             clip.style.left = `${leftPx}px`;
             clip.style.width = `${widthPx}px`;
 
@@ -1158,15 +1179,15 @@
                 <div class="clip-label-sticky absolute inset-y-0 left-0 flex items-center space-x-2 overflow-hidden pointer-events-none px-2.5 max-w-full">
                     ${!isUltraCompact ? `
                     <div class="w-4 h-4 rounded-full bg-slate-900/40 border border-white/30 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-play text-[8px] text-emerald-300"></i>
+                        <i class="fa-solid ${evt.allDay ? 'fa-calendar-day' : 'fa-play'} text-[8px] ${evt.allDay ? 'text-sky-300' : 'text-emerald-300'}"></i>
                     </div>` : ''}
                     <div class="truncate">
-                        ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.label}${evt.detail ? ' <span class="font-normal text-[12px] opacity-80 normal-case">' + evt.detail + '</span>' : ''}</div>` : ''}
+                        ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.allDay ? 'ทั้งวัน · ' : ''}${evt.label}${evt.detail ? ' <span class="font-normal text-[12px] opacity-80 normal-case">' + evt.detail + '</span>' : ''}</div>` : ''}
                         ${!isVeryCompact && evt.showTime !== false ? `<div class="text-[12px] opacity-90 font-mono">${startTimeStr} - ${endTimeStr}</div>` : ''}
                     </div>
                 </div>
 
-                <div class="resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/40 rounded-r-lg"></div>
+                ${!evt.allDay ? `<div class="resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/40 rounded-r-lg"></div>` : ''}
 
                 ${evt.comment && evt.comment.trim() ? `
                 <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-sky-500 flex items-center justify-center shadow ring-1 ring-slate-950/60 pointer-events-none z-10">
@@ -1347,7 +1368,7 @@
             let hasDragged = false;
 
             element.addEventListener('mousedown', (e) => {
-                if (state.locked) return;
+                if (state.locked || evtData.allDay) return;
                 if (e.target.classList.contains('resize-handle')) {
                     isResizing = true;
                 } else {
@@ -1438,7 +1459,7 @@
                 const clipEl = document.getElementById(evt.id);
                 if (!clipEl) return;
                 
-                const isCrossing = evt.date === state.todayKey && state.currentSystemSeconds >= evt.start && state.currentSystemSeconds <= (evt.start + evt.duration);
+                const isCrossing = !evt.allDay && evt.date === state.todayKey && state.currentSystemSeconds >= evt.start && state.currentSystemSeconds <= (evt.start + evt.duration);
                 if (isCrossing) {
                     clipEl.classList.add('clip-active-now');
                 } else {
