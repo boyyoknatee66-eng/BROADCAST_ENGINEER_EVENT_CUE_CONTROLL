@@ -1196,14 +1196,10 @@
             `;
 
             clip.addEventListener('mouseenter', (e) => {
-                if (evt.comment && evt.comment.trim()) {
-                    showEventTooltip(evt, e);
-                }
+                showEventTooltip(evt, e);
             });
             clip.addEventListener('mousemove', (e) => {
-                if (evt.comment && evt.comment.trim()) {
-                    positionEventTooltip(e);
-                }
+                positionEventTooltip(e);
             });
             clip.addEventListener('mouseleave', () => {
                 hideEventTooltip();
@@ -1248,9 +1244,17 @@
         }
 
         function showEventTooltip(evt, e) {
-            elements.eventTooltip.innerHTML = `
-                <div class="text-slate-100 text-[12px] whitespace-pre-wrap break-words">${escapeHtml(evt.comment)}</div>
-            `;
+            const rows = [
+                ['รายการ:', evt.label],
+                ['รายละเอียด:', evt.detail],
+                ['สถานที่:', evt.comment]
+            ].filter(([, val]) => val && String(val).trim());
+            elements.eventTooltip.innerHTML = rows.map(([labelText, val]) => `
+                <div class="text-[12px]">
+                    <span class="text-slate-400 font-semibold">${labelText}</span>
+                    <span class="text-slate-100 whitespace-pre-wrap break-words">${escapeHtml(val)}</span>
+                </div>
+            `).join('');
             elements.eventTooltip.classList.add('visible');
             positionEventTooltip(e);
         }
