@@ -329,9 +329,9 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                        <i class="fa-solid fa-comment-dots text-sky-400"></i> คอมเมนต์ <span class="text-slate-500 font-normal">(แสดงเมื่อเอาเมาส์ไปชี้บนอีเวนท์)</span>
+                        <i class="fa-solid fa-location-dot text-sky-400"></i> สถานที่ <span class="text-slate-500 font-normal">(แสดงเมื่อเอาเมาส์ไปชี้บนอีเวนท์)</span>
                     </label>
-                    <textarea id="event-comment" rows="2" placeholder="เช่น รอคอนเฟิร์มลำดับผังจากฝ่ายข่าวอีกครั้ง" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    <textarea id="event-comment" rows="2" placeholder="เช่น สตูดิโอ 2, ห้องข่าว" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
                 </div>
 
                 <!-- Start Time & End Time (HH:MM) Inputs -->
@@ -1188,11 +1188,6 @@
                 </div>
 
                 ${!evt.allDay ? `<div class="resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/40 rounded-r-lg"></div>` : ''}
-
-                ${evt.comment && evt.comment.trim() ? `
-                <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-sky-500 flex items-center justify-center shadow ring-1 ring-slate-950/60 pointer-events-none z-10">
-                    <i class="fa-solid fa-comment text-[7px] text-white"></i>
-                </div>` : ''}
             `;
 
             clip.addEventListener('mouseenter', (e) => {
