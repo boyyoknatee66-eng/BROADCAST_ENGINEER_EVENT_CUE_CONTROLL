@@ -107,6 +107,8 @@
             position: fixed;
             z-index: 60;
             max-width: 260px;
+            max-height: 55vh;
+            overflow-y: auto;
             pointer-events: none;
             background: #0f172a;
             color: #f1f5f9;
@@ -136,6 +138,19 @@
             border-style: solid;
             border-color: #0f172a transparent transparent transparent;
             filter: drop-shadow(0 2px 1px rgba(0,0,0,0.3));
+        }
+        /* เมื่อพื้นที่ด้านบนไม่พอ ให้กล่องข้อความขยายลงด้านล่างแทน (กันข้อความยาวโดนตัดขาดเหนือจอ) */
+        #event-tooltip.tooltip-below {
+            transform: translate(-50%, 0) translateY(10px) scale(0.96);
+        }
+        #event-tooltip.tooltip-below.visible {
+            transform: translate(-50%, 0) translateY(10px) scale(1);
+        }
+        #event-tooltip.tooltip-below::after {
+            top: auto;
+            bottom: 100%;
+            border-color: transparent transparent #0f172a transparent;
+            filter: drop-shadow(0 -2px 1px rgba(0,0,0,0.3));
         }
     </style>
 </head>
@@ -319,19 +334,22 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">ชื่อรายการ / คลิปเหตุการณ์</label>
-                    <input type="text" id="event-label" required placeholder="เช่น ถ่ายทอดสดผ่านดาวเทียม ช่อง 1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <input type="text" id="event-label" required maxlength="1024" placeholder="เช่น ถ่ายทอดสดผ่านดาวเทียม ช่อง 1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <div id="event-label-count" class="text-[11px] text-slate-500 text-right mt-1 font-mono"></div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">รายละเอียด</label>
-                    <input type="text" id="event-detail" placeholder="เช่น ถ่ายทอดสด Asian Game" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <input type="text" id="event-detail" maxlength="4096" placeholder="เช่น ถ่ายทอดสด Asian Game" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <div id="event-detail-count" class="text-[11px] text-slate-500 text-right mt-1 font-mono"></div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
                         <i class="fa-solid fa-location-dot text-sky-400"></i> สถานที่ <span class="text-slate-500 font-normal">(แสดงเมื่อเอาเมาส์ไปชี้บนอีเวนท์)</span>
                     </label>
-                    <textarea id="event-comment" rows="2" placeholder="เช่น สตูดิโอ 2, ห้องข่าว" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    <textarea id="event-comment" rows="2" maxlength="1024" placeholder="เช่น สตูดิโอ 2, ห้องข่าว" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    <div id="event-comment-count" class="text-[11px] text-slate-500 text-right mt-1 font-mono"></div>
                 </div>
 
                 <!-- Start Time & End Time (HH:MM) Inputs -->
@@ -868,7 +886,7 @@
                                     id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
                                     source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
                                     label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
-                                    detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 300),
+                                    detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 4096),
                                     comment: it.location ? `สถานที่: ${gcalClean(it.location)}` : '',
                                     allDay: true, showTime: false,
                                     start: 0, duration: 86400,
@@ -893,7 +911,7 @@
                                 id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
                                 source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
                                 label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
-                                detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 300),
+                                detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 4096),
                                 comment: it.location ? `สถานที่: ${gcalClean(it.location)}` : '',
                                 showTime: true,
                                 start: Math.round((segS - day) / 1000),
@@ -946,10 +964,34 @@
             document.getElementById('gcal-pull').addEventListener('click', gcalPull);
         }
 
+function initCharCounters() {
+            const fields = ['event-label', 'event-detail', 'event-comment'];
+            fields.forEach(id => {
+                const input = document.getElementById(id);
+                const out = document.getElementById(id + '-count');
+                const update = () => {
+                    const max = Number(input.getAttribute('maxlength')) || 0;
+                    const len = input.value.length;
+                    out.textContent = `${len}/${max}`;
+                    out.classList.toggle('text-amber-400', len >= max);
+                    out.classList.toggle('text-slate-500', len < max);
+                };
+                input.addEventListener('input', update);
+                update();
+            });
+        }
+
+        function updateCharCounters() {
+            ['event-label', 'event-detail', 'event-comment'].forEach(id => {
+                document.getElementById(id).dispatchEvent(new Event('input'));
+            });
+        }
+
         function initPersistence() {
             initToolsToggle();
             initLock();
             gcalInitUI();
+            initCharCounters();
             state.todayKey = dateKey(new Date());
             state.viewDate = state.todayKey;
             loadFromStorage();
@@ -1256,15 +1298,23 @@
 
         function positionEventTooltip(e) {
             const margin = 12;
+            const tip = elements.eventTooltip;
+            const tipWidth = tip.offsetWidth || 260;
+            const tipHeight = tip.offsetHeight || 40;
+
             let x = e.clientX;
-            let y = e.clientY - 14;
-
-            const tipWidth = elements.eventTooltip.offsetWidth || 260;
             x = Math.min(Math.max(x, margin + tipWidth / 2), window.innerWidth - margin - tipWidth / 2);
-            y = Math.max(y, 60);
 
-            elements.eventTooltip.style.left = `${x}px`;
-            elements.eventTooltip.style.top = `${y}px`;
+            // ถ้าข้อความยาวจนพื้นที่เหนือเคอร์เซอร์ไม่พอ ให้แสดงด้านล่างเคอร์เซอร์แทน กันข้อความโดนตัดขาดเหนือจอ
+            const showBelow = (e.clientY - 14 - tipHeight) < margin;
+            tip.classList.toggle('tooltip-below', showBelow);
+
+            const y = showBelow
+                ? Math.min(e.clientY + 14, window.innerHeight - margin - tipHeight)
+                : Math.max(e.clientY - 14, margin + tipHeight);
+
+            tip.style.left = `${x}px`;
+            tip.style.top = `${y}px`;
         }
 
         function hideEventTooltip() {
@@ -1798,11 +1848,13 @@
                 document.getElementById('event-color').value = evt.color;
                 document.getElementById('event-alert').value = evt.alert;
                 syncEventColorTrigger();
+                updateCharCounters();
                 elements.btnDeleteEvent.classList.remove('hidden');
             } else {
                 document.getElementById('modal-title').textContent = 'เพิ่มรายการออกอากาศใหม่';
                 elements.eventForm.reset();
                 document.getElementById('event-id').value = '';
+                updateCharCounters();
                 
                 const currentSec = Math.floor(state.currentSystemSeconds);
                 const startSec = currentSec + 10;
