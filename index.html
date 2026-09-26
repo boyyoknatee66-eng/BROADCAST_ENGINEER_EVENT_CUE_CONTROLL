@@ -109,15 +109,21 @@
             max-width: 260px;
             max-height: 55vh;
             overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             pointer-events: none;
-            background: #0f172a;
-            color: #f1f5f9;
-            border: 1px solid rgba(56, 189, 248, 0.5);
+            background: linear-gradient(150deg, #f8fafc 0%, #cbd5e1 45%, #94a3b8 100%);
+            color: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.8);
             border-radius: 10px;
             padding: 8px 12px;
-            font-size: 12px;
+            font-size: 15px;
             line-height: 1.45;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.1);
+            box-shadow:
+                0 16px 32px rgba(0, 0, 0, 0.45),
+                0 6px 10px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -2px 3px rgba(15, 23, 42, 0.25);
             opacity: 0;
             visibility: hidden;
             transform: translate(-50%, -100%) translateY(-10px) scale(0.96);
@@ -128,6 +134,9 @@
             visibility: visible;
             transform: translate(-50%, -100%) translateY(-10px) scale(1);
         }
+        #event-tooltip::-webkit-scrollbar {
+            display: none;
+        }
         #event-tooltip::after {
             content: '';
             position: absolute;
@@ -136,10 +145,10 @@
             transform: translateX(-50%);
             border-width: 6px;
             border-style: solid;
-            border-color: #0f172a transparent transparent transparent;
+            border-color: #94a3b8 transparent transparent transparent;
             filter: drop-shadow(0 2px 1px rgba(0,0,0,0.3));
         }
-        /* เมื่อพื้นที่ด้านบนไม่พอ ให้กล่องข้อความขยายลงด้านล่างแทน (กันข้อความยาวโดนตัดขาดเหนือจอ) */
+        /* When there is not enough space above, expand the tooltip below instead (prevents long text being cut off above the screen) */
         #event-tooltip.tooltip-below {
             transform: translate(-50%, 0) translateY(10px) scale(0.96);
         }
@@ -149,7 +158,7 @@
         #event-tooltip.tooltip-below::after {
             top: auto;
             bottom: 100%;
-            border-color: transparent transparent #0f172a transparent;
+            border-color: transparent transparent #f8fafc transparent;
             filter: drop-shadow(0 -2px 1px rgba(0,0,0,0.3));
         }
     </style>
@@ -166,7 +175,7 @@
                 <h1 class="font-bold text-sm md:text-base tracking-wide text-white flex items-center gap-2">
                     BROADCAST ENGINEER EVENT CUE CONTROLL
                 </h1>
-                <p class="text-[11px] text-slate-400">ระบบเตือนคิวออกอากาศอ้างอิงเวลาจริง • Center Target Line Mode</p>
+                <p class="text-[11px] text-slate-400">Real-time broadcast cue alert system • Center Target Line Mode</p>
             </div>
         </div>
 
@@ -175,7 +184,7 @@
             <div class="flex items-center space-x-3">
                 <i class="fa-regular fa-clock text-emerald-400 text-lg"></i>
                 <div>
-                    <div class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">เวลาปัจจุบัน (SYSTEM CLOCK)</div>
+                    <div class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Current Time (SYSTEM CLOCK)</div>
                     <div id="wall-clock" class="font-mono text-3xl font-extrabold text-emerald-400 leading-none">00:00:00.0</div>
                 </div>
             </div>
@@ -187,8 +196,8 @@
 
             <div class="flex items-center space-x-1.5">
                 <label for="goto-timecode" class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Go to</label>
-                <input type="text" id="goto-timecode" placeholder="HH:MM" maxlength="5" class="w-16 bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-center text-amber-400 font-mono font-bold text-xs focus:outline-none focus:border-blue-500" title="กรอกเวลา เช่น 15:54 หรือ 1554 แล้วกด Enter">
-                <button id="btn-goto-time" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md font-bold text-xs transition" title="เลื่อนไทม์ไลน์ไปยังเวลาที่ระบุ">
+                <input type="text" id="goto-timecode" placeholder="HH:MM" maxlength="5" class="w-16 bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-center text-amber-400 font-mono font-bold text-xs focus:outline-none focus:border-blue-500" title="Enter time, e.g. 15:54 or 1554, then press Enter">
+                <button id="btn-goto-time" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md font-bold text-xs transition" title="Jump timeline to the specified time">
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
@@ -197,30 +206,30 @@
         <!-- Control Action Tools -->
         <div class="flex items-center space-x-2">
             <div class="flex items-center gap-1.5">
-                <button id="btn-date-prev" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="วันก่อนหน้า"><i class="fa-solid fa-chevron-left"></i></button>
-                <input type="date" id="view-date" class="bg-slate-800 text-slate-200 border border-slate-700 rounded-lg px-2 py-1 text-[15px] font-mono" title="เลือกวันที่ (เก็บข้อมูล 3 เดือน)">
-                <button id="btn-date-next" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="วันถัดไป"><i class="fa-solid fa-chevron-right"></i></button>
-                <button id="btn-date-today" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition">วันนี้</button>
+                <button id="btn-date-prev" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="Previous day"><i class="fa-solid fa-chevron-left"></i></button>
+                <input type="date" id="view-date" class="bg-slate-800 text-slate-200 border border-slate-700 rounded-lg px-2 py-1 text-[15px] font-mono" title="Select date (data kept for 3 months)">
+                <button id="btn-date-next" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-700 rounded-lg transition" title="Next day"><i class="fa-solid fa-chevron-right"></i></button>
+                <button id="btn-date-today" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition">Today</button>
                 <span id="save-status" class="text-[11px] text-slate-500 font-mono hidden lg:inline"></span>
             </div>
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
             <button id="btn-audio-toggle" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="Toggle Cue Beep Audio">
-                <i id="audio-icon" class="fa-solid fa-volume-high text-emerald-400"></i> <span id="audio-status-text">เปิดเสียงเตือน</span>
+                <i id="audio-icon" class="fa-solid fa-volume-high text-emerald-400"></i> <span id="audio-status-text">Alert Sound ON</span>
             </button>
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
-            <button id="btn-tools-toggle" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="ซ่อน/แสดงเครื่องมือแก้ไข" aria-expanded="false">
-                <i class="fa-solid fa-screwdriver-wrench text-slate-400"></i> <span id="tools-toggle-text">แสดงเครื่องมือ</span> <i id="tools-lock-indicator" class="fa-solid fa-lock text-red-400 text-xs hidden"></i>
+            <button id="btn-tools-toggle" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="Show/hide edit tools" aria-expanded="false">
+                <i class="fa-solid fa-screwdriver-wrench text-slate-400"></i> <span id="tools-toggle-text">Show Tools</span> <i id="tools-lock-indicator" class="fa-solid fa-lock text-red-400 text-xs hidden"></i>
             </button>
             <div id="edit-tools" class="hidden items-center space-x-2">
             <div class="h-6 w-px bg-slate-800 mx-1"></div>
-            <button id="btn-lock-edit" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="กดเพื่อสลับ: ห้ามแก้ไข / แก้ไขได้ (ทุกอีเวนท์ ทุกเลเยอร์)">
-                <i id="lock-icon" class="fa-solid fa-lock-open text-emerald-400"></i> <span id="lock-text">แก้ไขได้</span>
+            <button id="btn-lock-edit" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="Toggle: Locked / Editable (all events, all layers)">
+                <i id="lock-icon" class="fa-solid fa-lock-open text-emerald-400"></i> <span id="lock-text">Editable</span>
             </button>
             <button id="btn-add-layer" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5">
-                <i class="fa-solid fa-layer-group text-blue-400"></i> เพิ่มเลเยอร์
+                <i class="fa-solid fa-layer-group text-blue-400"></i> Add Layer
             </button>
             <button id="btn-add-clip" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-[15px] transition shadow-md shadow-blue-600/30 flex items-center gap-1.5">
-                <i class="fa-solid fa-plus"></i> เพิ่มอีเวนท์
+                <i class="fa-solid fa-plus"></i> Add Event
             </button>
 
             <button id="btn-select-count" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="Selected Events Count">
@@ -245,7 +254,7 @@
             <button id="btn-import-trigger" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition text-xs" title="Import Schedule Config">
                 <i class="fa-solid fa-upload"></i>
             </button>
-            <button id="btn-gcal" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="ดึงอีเวนท์จาก Google Calendar"><i class="fa-brands fa-google text-sky-400"></i> Google Calendar</button>
+            <button id="btn-gcal" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-medium text-[15px] transition flex items-center gap-1.5" title="Pull events from Google Calendar"><i class="fa-brands fa-google text-sky-400"></i> Google Calendar</button>
             <input type="file" id="import-file-input" class="hidden" accept=".json">
             </div>
         </div>
@@ -257,8 +266,8 @@
         <!-- Left Sidebar: Track Headers with Gear Settings -->
         <div class="w-60 md:w-64 bg-slate-900/95 border-r border-slate-800 flex flex-col z-30 shrink-0 shadow-xl">
             <div class="h-10 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between text-xs font-semibold text-slate-400">
-                <span>ช่องสัญญาณ / LAYERS</span>
-                <span id="track-count" class="text-slate-500 font-mono text-[11px]">0 เลเยอร์</span>
+                <span>Channels / LAYERS</span>
+                <span id="track-count" class="text-slate-500 font-mono text-[11px]">0 layers</span>
             </div>
             
             <div id="layer-headers-container" class="flex-1 overflow-y-hidden divide-y divide-slate-800/60">
@@ -272,7 +281,7 @@
             <!-- FIXED CENTER RED PLAYHEAD MARKER -->
             <div id="playhead" class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-red-500 z-40 playhead-line-center pointer-events-none -translate-x-1/2">
                 <div class="w-32 h-6 bg-red-600 -translate-x-1/2 flex items-center justify-center rounded-b-md shadow-lg text-white font-bold text-[10px] border border-red-400/50 uppercase tracking-wider">
-                    <i class="fa-solid fa-caret-down mr-1"></i> เวลาปัจจุบัน (CUE)
+                    <i class="fa-solid fa-caret-down mr-1"></i> Current Time (CUE)
                 </div>
             </div>
 
@@ -295,15 +304,15 @@
         <!-- Time Window Presets (30m, 1h, 3h, 6h, 12h, 24h, 48h) -->
         <div class="flex items-center space-x-2 ml-auto">
             <span class="text-xs font-semibold text-slate-300 mr-1 flex items-center gap-1.5">
-                <i class="fa-solid fa-down-left-and-up-right-to-center text-blue-400 text-xs"></i> ช่วงมุมมองไทม์ไลน์:
+                <i class="fa-solid fa-down-left-and-up-right-to-center text-blue-400 text-xs"></i> Timeline view span:
             </span>
             <div id="time-presets-container" class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 space-x-1">
-                <button data-span="1800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">30 นาที</button>
-                <button data-span="3600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent preset-btn-active">1 ชม.</button>
-                <button data-span="10800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">3 ชม.</button>
-                <button data-span="21600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">6 ชม.</button>
-                <button data-span="43200" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">12 ชม.</button>
-                <button data-span="86400" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">24 ชม.</button>
+                <button data-span="1800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">30 min</button>
+                <button data-span="3600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent preset-btn-active">1 hr</button>
+                <button data-span="10800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">3 hr</button>
+                <button data-span="21600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">6 hr</button>
+                <button data-span="43200" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">12 hr</button>
+                <button data-span="86400" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">24 hr</button>
             </div>
         </div>
     </footer>
@@ -319,7 +328,7 @@
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 text-slate-200">
             <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
                 <h3 id="modal-title" class="font-bold text-base text-white flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> แก้ไขรายการออกอากาศ
+                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Edit Broadcast Item
                 </h3>
                 <button id="modal-close" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -328,27 +337,27 @@
                 <input type="hidden" id="event-id">
                 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">เลือกเลเยอร์ / ช่องสัญญาณ</label>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Select Layer / Channel</label>
                     <select id="event-layer" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"></select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">ชื่อรายการ / คลิปเหตุการณ์</label>
-                    <input type="text" id="event-label" required maxlength="1024" placeholder="เช่น ถ่ายทอดสดผ่านดาวเทียม ช่อง 1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Item / Event Clip Name</label>
+                    <input type="text" id="event-label" required maxlength="1024" placeholder="e.g. Live Satellite Broadcast, Channel 1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                     <div id="event-label-count" class="text-[11px] text-slate-500 text-right mt-1 font-mono"></div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">รายละเอียด</label>
-                    <input type="text" id="event-detail" maxlength="4096" placeholder="เช่น ถ่ายทอดสด Asian Game" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Details</label>
+                    <input type="text" id="event-detail" maxlength="4096" placeholder="e.g. Live broadcast of Asian Games" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                     <div id="event-detail-count" class="text-[11px] text-slate-500 text-right mt-1 font-mono"></div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                        <i class="fa-solid fa-location-dot text-sky-400"></i> สถานที่ <span class="text-slate-500 font-normal">(แสดงเมื่อเอาเมาส์ไปชี้บนอีเวนท์)</span>
+                        <i class="fa-solid fa-location-dot text-sky-400"></i> Location <span class="text-slate-500 font-normal">(shown when hovering over an event)</span>
                     </label>
-                    <textarea id="event-comment" rows="2" maxlength="1024" placeholder="เช่น สตูดิโอ 2, ห้องข่าว" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    <textarea id="event-comment" rows="2" maxlength="1024" placeholder="e.g. Studio 2, Newsroom" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"></textarea>
                     <div id="event-comment-count" class="text-[11px] text-slate-500 text-right mt-1 font-mono"></div>
                 </div>
 
@@ -356,52 +365,52 @@
                 <div class="grid grid-cols-2 gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">
-                            เวลาเริ่มต้น <span class="text-[10px] text-amber-400 font-mono">(ชม:นาที หรือ 1800)</span>
+                            Start Time <span class="text-[10px] text-amber-400 font-mono">(HH:MM or 1800)</span>
                         </label>
-                        <input type="text" id="event-start-timecode" required placeholder="1800 หรือ 18:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-blue-500">
+                        <input type="text" id="event-start-timecode" required placeholder="1800 or 18:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-blue-500">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">
-                            เวลาสิ้นสุด <span class="text-[10px] text-amber-400 font-mono">(ชม:นาที หรือ 1830)</span>
+                            End Time <span class="text-[10px] text-amber-400 font-mono">(HH:MM or 1830)</span>
                         </label>
-                        <input type="text" id="event-end-timecode" required placeholder="1830 หรือ 18:30" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-blue-500">
+                        <input type="text" id="event-end-timecode" required placeholder="1830 or 18:30" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-blue-500">
                     </div>
 
                     <label class="col-span-2 flex items-center gap-2 pt-1 cursor-pointer select-none">
                         <input type="checkbox" id="event-show-time" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer">
-                        <span class="text-xs font-medium text-slate-300">แสดงเวลาบนอีเวนท์ (Start - End) บนแท่งไทม์ไลน์</span>
+                        <span class="text-xs font-medium text-slate-300">Show time on event (Start - End) on the timeline bar</span>
                     </label>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">ความยาวคำนวณอัตโนมัติ (วินาที)</label>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Auto-calculated Duration (seconds)</label>
                     <input type="number" id="event-duration" min="2" step="1" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-300 font-mono focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">สีสัญลักษณ์</label>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Symbol Color</label>
 
                         <!-- Real value holder (kept for existing JS: .value get/set) -->
                         <select id="event-color" class="hidden">
-                            <option value="emerald">เขียวมรกต (TV Live)</option>
-                            <option value="amber">ส้มอำพัน (Satellite)</option>
-                            <option value="blue">ฟ้าอีเลกทริก (Web/App)</option>
-                            <option value="purple">ม่วงดิจิทัล (Social Stream)</option>
-                            <option value="rose">แดงกู้ภัย (Emergency)</option>
-                            <option value="cyan">ฟ้าใส (Live Stream)</option>
-                            <option value="yellow">เหลืองทอง (Special)</option>
-                            <option value="red">แดง</option>
-                            <option value="orange">ส้ม</option>
-                            <option value="lime">เขียวมะนาว</option>
-                            <option value="green">เขียว</option>
-                            <option value="teal">เขียวอมฟ้า</option>
-                            <option value="sky">ฟ้าสดใส</option>
-                            <option value="indigo">น้ำเงินอมม่วง</option>
-                            <option value="violet">ม่วง</option>
-                            <option value="fuchsia">ชมพูอมม่วง</option>
-                            <option value="pink">ชมพู</option>
+                            <option value="emerald">Emerald (TV Live)</option>
+                            <option value="amber">Amber (Satellite)</option>
+                            <option value="blue">Electric Blue (Web/App)</option>
+                            <option value="purple">Digital Purple (Social Stream)</option>
+                            <option value="rose">Rescue Red (Emergency)</option>
+                            <option value="cyan">Sky (Live Stream)</option>
+                            <option value="yellow">Golden Yellow (Special)</option>
+                            <option value="red">Red</option>
+                            <option value="orange">Orange</option>
+                            <option value="lime">Lime</option>
+                            <option value="green">Green</option>
+                            <option value="teal">Teal</option>
+                            <option value="sky">Sky Blue</option>
+                            <option value="indigo">Indigo</option>
+                            <option value="violet">Violet</option>
+                            <option value="fuchsia">Fuchsia</option>
+                            <option value="pink">Pink</option>
                         </select>
 
                         <!-- Custom dropdown UI with a small color swatch square before each label -->
@@ -417,23 +426,23 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">เตือนล่วงหน้า (Pre-Cue)</label>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Pre-Cue Alert</label>
                         <select id="event-alert" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                            <option value="10">ล่วงหน้า 10 วินาที</option>
-                            <option value="30" selected>ล่วงหน้า 30 วินาที</option>
-                            <option value="60">ล่วงหน้า 60 วินาที</option>
-                            <option value="0">ปิดการเตือน</option>
+                            <option value="10">10 seconds before</option>
+                            <option value="30" selected>30 seconds before</option>
+                            <option value="60">60 seconds before</option>
+                            <option value="0">Alert off</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="flex justify-between items-center pt-4 border-t border-slate-800 mt-6">
                     <button type="button" id="btn-delete-event" class="px-3.5 py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 rounded-lg text-xs font-semibold transition border border-rose-500/30 flex items-center gap-1.5 hidden">
-                        <i class="fa-solid fa-trash-can"></i> ลบอีเวนท์นี้
+                        <i class="fa-solid fa-trash-can"></i> Delete This Event
                     </button>
                     <div class="flex space-x-2 ml-auto">
-                        <button type="button" id="btn-cancel-modal" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">ยกเลิก</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition shadow-md shadow-blue-600/30">บันทึกข้อมูล</button>
+                        <button type="button" id="btn-cancel-modal" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition shadow-md shadow-blue-600/30">Save Data</button>
                     </div>
                 </div>
             </form>
@@ -445,7 +454,7 @@
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 text-slate-200">
             <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
                 <h3 class="font-bold text-base text-white flex items-center gap-2">
-                    <i class="fa-solid fa-gear text-blue-400"></i> ตั้งค่าช่องสัญญาณ (Layer Settings)
+                    <i class="fa-solid fa-gear text-blue-400"></i> Channel Settings (Layer Settings)
                 </h3>
                 <button id="layer-modal-close" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -454,12 +463,12 @@
                 <input type="hidden" id="layer-id">
                 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">ชื่อช่องสัญญาณ / เลเยอร์</label>
-                    <input type="text" id="layer-name-input" required placeholder="เช่น TV Broadcast Live" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 font-semibold">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Channel / Layer Name</label>
+                    <input type="text" id="layer-name-input" required placeholder="e.g. TV Broadcast Live" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 font-semibold">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-2">เลือก ไอคอนประจำช่อง (Icon)</label>
+                    <label class="block text-xs font-semibold text-slate-400 mb-2">Choose Channel Icon</label>
                     <input type="hidden" id="layer-icon-input" value="fa-tv">
                     
                     <div id="icon-picker-grid" class="grid grid-cols-5 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800 max-h-40 overflow-y-auto">
@@ -468,26 +477,26 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">สีประจำช่อง (Theme Color)</label>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Channel Theme Color</label>
                     <select id="layer-color-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                        <option value="border-emerald-500 text-emerald-400">เขียวมรกต (Emerald Green)</option>
-                        <option value="border-amber-500 text-amber-400">ส้มอำพัน (Amber Orange)</option>
-                        <option value="border-blue-500 text-blue-400">ฟ้าอีเลกทริก (Electric Blue)</option>
-                        <option value="border-purple-500 text-purple-400">ม่วงดิจิทัล (Digital Purple)</option>
-                        <option value="border-rose-500 text-rose-400">แดงสัญญาณ (Signal Red)</option>
-                        <option value="border-cyan-500 text-cyan-400">ฟ้าใส (Cyan Live)</option>
-                        <option value="border-yellow-500 text-yellow-400">เหลืองทอง (Golden Yellow)</option>
-                        <option value="border-slate-500 text-slate-400">เทาสแตนบาย (Slate Standby)</option>
+                        <option value="border-emerald-500 text-emerald-400">Emerald Green</option>
+                        <option value="border-amber-500 text-amber-400">Amber Orange</option>
+                        <option value="border-blue-500 text-blue-400">Electric Blue</option>
+                        <option value="border-purple-500 text-purple-400">Digital Purple</option>
+                        <option value="border-rose-500 text-rose-400">Signal Red</option>
+                        <option value="border-cyan-500 text-cyan-400">Cyan Live</option>
+                        <option value="border-yellow-500 text-yellow-400">Golden Yellow</option>
+                        <option value="border-slate-500 text-slate-400">Slate Standby</option>
                     </select>
                 </div>
 
                 <div class="flex justify-between items-center pt-4 border-t border-slate-800 mt-6">
                     <button type="button" id="btn-delete-layer" class="px-3.5 py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 rounded-lg text-xs font-semibold transition border border-rose-500/30 flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash-can"></i> ลบเลเยอร์นี้
+                        <i class="fa-solid fa-trash-can"></i> Delete This Layer
                     </button>
                     <div class="flex space-x-2 ml-auto">
-                        <button type="button" id="btn-cancel-layer-modal" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">ยกเลิก</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition shadow-md shadow-blue-600/30">บันทึก</button>
+                        <button type="button" id="btn-cancel-layer-modal" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition shadow-md shadow-blue-600/30">Save</button>
                     </div>
                 </div>
             </form>
@@ -534,8 +543,8 @@
             { class: 'fa-film', label: 'Film Feed' },
             { class: 'fa-podcast', label: 'Podcast Stream' },
             { class: 'fa-sliders', label: 'Mixer AUX' },
-            { class: 'fa-hard-hat', label: 'วิศวกร (Engineer)' },
-            { class: 'fa-user-tie', label: 'คนไอที (IT Staff)' }
+            { class: 'fa-hard-hat', label: 'Engineer' },
+            { class: 'fa-user-tie', label: 'IT Staff' }
         ];
 
         const elements = {
@@ -600,7 +609,7 @@
             timePresetsContainer: document.getElementById('time-presets-container')
         };
 
-        // ===== บันทึกอัตโนมัติ (localStorage) + เลือกวันที่ + เก็บข้อมูล 3 เดือน =====
+        // ===== Auto-save (localStorage) + date picker + keep 3 months of data =====
         const STORAGE_KEY = 'broadcast-cue-schedule-v1';
         const dateUI = {
             input: document.getElementById('view-date'),
@@ -619,7 +628,7 @@
             const [y, m, d] = key.split('-').map(Number);
             return dateKey(new Date(y, m - 1, d + days));
         }
-        // ช่วงที่เก็บ: วันที่ 1 ของเดือนที่แล้ว ถึง วันสุดท้ายของเดือนหน้า
+        // Retention window: 1st day of last month through last day of next month
         function windowStartKey() { const n = new Date(); return dateKey(new Date(n.getFullYear(), n.getMonth() - 1, 1)); }
         function windowEndKey() { const n = new Date(); return dateKey(new Date(n.getFullYear(), n.getMonth() + 2, 0)); }
 
@@ -634,7 +643,7 @@
             const before = state.events.length;
             state.events = state.events.filter(e => !e.date || e.date >= start);
             const removed = before - state.events.length;
-            if (removed > 0) showToast(`ลบอีเวนท์ที่เก่ากว่า ${start} จำนวน ${removed} รายการ`, 'amber');
+            if (removed > 0) showToast(`Deleted ${removed} events older than ${start}`, 'amber');
         }
 
         function loadFromStorage() {
@@ -647,7 +656,7 @@
                     state.events = saved.events.map(e => clampEventToDay({ ...e, date: e.date || state.todayKey }));
                 }
             } catch (err) {
-                console.warn('โหลดข้อมูลที่บันทึกไว้ไม่สำเร็จ', err);
+                console.warn('Failed to load saved data', err);
             }
         }
 
@@ -657,16 +666,16 @@
                 if (body === lastSavedBody) return;
                 localStorage.setItem(STORAGE_KEY, body);
                 lastSavedBody = body;
-                dateUI.status.textContent = `บันทึกแล้ว ${new Date().toTimeString().slice(0, 8)}`;
+                dateUI.status.textContent = `Saved ${new Date().toTimeString().slice(0, 8)}`;
                 dateUI.status.classList.remove('text-red-400');
                 dateUI.status.classList.add('text-slate-500');
             } catch (err) {
-                dateUI.status.textContent = 'บันทึกไม่ได้';
+                dateUI.status.textContent = 'Save failed';
                 dateUI.status.classList.remove('text-slate-500');
                 dateUI.status.classList.add('text-red-400');
                 if (!storageErrorShown) {
                     storageErrorShown = true;
-                    showToast('บันทึกลงเบราว์เซอร์ไม่ได้ (พื้นที่เต็มหรือปิดการเก็บข้อมูล) กรุณา Export สำรองไว้', 'red');
+                    showToast('Cannot save to browser (storage full or disabled). Please Export a backup', 'red');
                 }
             }
         }
@@ -683,10 +692,11 @@
         function setViewDate(key) {
             const min = windowStartKey(), max = windowEndKey();
             if (key < min || key > max) {
-                showToast(`เลือกได้เฉพาะ ${min} ถึง ${max} (เก็บข้อมูล 3 เดือน)`, 'amber');
+                showToast(`Only ${min} to ${max} is allowed (3-month retention)`, 'amber');
                 key = key < min ? min : max;
             }
             if (state.pasteMode) deactivatePasteMode();
+            hideEventTooltip();
             state.viewDate = key;
             state.selectedEvents.clear();
             renderTimeline();
@@ -694,7 +704,7 @@
             updateDateUI();
         }
 
-        // เปลี่ยนวันตอนเที่ยงคืน: ถ้ากำลังดูวันนี้อยู่ ให้เลื่อนไปวันใหม่ และลบข้อมูลที่หลุดช่วง 3 เดือน
+        // Midnight rollover: if viewing today, advance to the new day and prune data outside the 3-month window
         function syncToday(now) {
             const key = dateKey(now);
             if (key === state.todayKey) return;
@@ -706,6 +716,11 @@
             updateDateUI();
         }
 
+        function toolsAreHidden() {
+            const panel = document.getElementById('edit-tools');
+            return !panel || panel.classList.contains('hidden');
+        }
+
         function initToolsToggle() {
             const KEY = 'broadcast-cue-tools-visible';
             const panel = document.getElementById('edit-tools');
@@ -714,8 +729,9 @@
             const apply = (show) => {
                 panel.classList.toggle('hidden', !show);
                 panel.classList.toggle('flex', show);
-                text.textContent = show ? 'ซ่อนเครื่องมือ' : 'แสดงเครื่องมือ';
+                text.textContent = show ? 'Hide Tools' : 'Show Tools';
                 btn.setAttribute('aria-expanded', String(show));
+                if (show) hideEventTooltip();
             };
             let visible = false;
             try { visible = localStorage.getItem(KEY) === '1'; } catch (err) {}
@@ -731,7 +747,7 @@
         const LOCK_GUARDED_IDS = ['btn-add-layer', 'btn-add-clip', 'btn-paste-timeline', 'btn-undo', 'btn-delete', 'btn-import-trigger'];
 
         function notifyLocked() {
-            showToast('ล็อกอยู่: ห้ามแก้ไข (ปลดล็อกได้ที่ เครื่องมือ → แก้ไขได้)', 'amber');
+            showToast('Locked: editing disabled (unlock via Tools → Editable)', 'amber');
         }
 
         function applyLock(locked) {
@@ -747,7 +763,7 @@
             });
             document.getElementById('lock-icon').className = locked ? 'fa-solid fa-lock text-red-400' : 'fa-solid fa-lock-open text-emerald-400';
             const t = document.getElementById('lock-text');
-            t.textContent = locked ? 'ห้ามแก้ไข' : 'แก้ไขได้';
+            t.textContent = locked ? 'Locked' : 'Editable';
             t.classList.toggle('text-red-400', locked);
             document.getElementById('tools-lock-indicator').classList.toggle('hidden', !locked);
         }
@@ -760,17 +776,17 @@
                 locked = !locked;
                 applyLock(locked);
                 try { localStorage.setItem(LOCK_KEY, locked ? '1' : '0'); } catch (err) {}
-                showToast(locked ? 'ล็อกแล้ว: ห้ามแก้ไขทุกอีเวนท์ ทุกเลเยอร์' : 'ปลดล็อกแล้ว: แก้ไขได้', locked ? 'red' : 'emerald');
+                showToast(locked ? 'Locked: editing disabled for all events and layers' : 'Unlocked: editing enabled', locked ? 'red' : 'emerald');
             });
         }
 
-        // ===== Google Calendar: ดึงอีเวนท์เข้าไทม์ไลน์ (อ่านอย่างเดียว) =====
+        // ===== Google Calendar: pull events into the timeline (read-only) =====
         const GCAL_KEY = 'broadcast-cue-gcal';
         const gcal = { token: null, tokenExp: 0, calendars: [] };
 
         function gcalSettings() { try { return JSON.parse(localStorage.getItem(GCAL_KEY)) || {}; } catch (err) { return {}; } }
         function gcalSaveSettings(patch) { try { localStorage.setItem(GCAL_KEY, JSON.stringify({ ...gcalSettings(), ...patch })); } catch (err) {} }
-        // ข้อความจากปฏิทินอาจมาจากคนอื่น (คำเชิญ) ต้องตัด HTML ออกก่อนเข้าไทม์ไลน์
+        // Calendar text may come from other people (invitations), so strip HTML before putting it on the timeline
         function gcalClean(v) {
             return String(v || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '');
         }
@@ -786,7 +802,7 @@
                 const sc = document.createElement('script');
                 sc.src = 'https://accounts.google.com/gsi/client';
                 sc.onload = () => resolve();
-                sc.onerror = () => reject(new Error('โหลดสคริปต์ Google ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต'));
+                sc.onerror = () => reject(new Error('Failed to load the Google script. Check your internet connection'));
                 document.head.appendChild(sc);
             });
         }
@@ -804,7 +820,7 @@
                         gcal.tokenExp = Date.now() + (Number(resp.expires_in) || 3600) * 1000;
                         resolve(gcal.token);
                     },
-                    error_callback: (err) => reject(new Error(err.message || err.type || 'ยกเลิกการเชื่อมต่อ'))
+                    error_callback: (err) => reject(new Error(err.message || err.type || 'Connection cancelled'))
                 });
                 client.requestAccessToken();
             });
@@ -813,20 +829,20 @@
         async function gcalApi(url, clientId) {
             const token = await gcalGetToken(clientId);
             const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-            if (res.status === 401) { gcal.token = null; throw new Error('สิทธิ์หมดอายุ กรุณากดเชื่อมต่อใหม่'); }
+            if (res.status === 401) { gcal.token = null; throw new Error('Token expired. Please reconnect'); }
             if (!res.ok) {
                 const j = await res.json().catch(() => ({}));
-                throw new Error((j.error && j.error.message) || `Google API ผิดพลาด (${res.status})`);
+                throw new Error((j.error && j.error.message) || `Google API error (${res.status})`);
             }
             return res.json();
         }
 
         async function gcalConnect() {
             const clientId = document.getElementById('gcal-client-id').value.trim();
-            if (!clientId) return gcalSetStatus('กรุณาใส่ Client ID ก่อน', true);
+            if (!clientId) return gcalSetStatus('Please enter a Client ID first', true);
             gcalSaveSettings({ clientId });
             try {
-                gcalSetStatus('กำลังเชื่อมต่อ...');
+                gcalSetStatus('Connecting...');
                 const data = await gcalApi('https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader', clientId);
                 gcal.calendars = data.items || [];
                 const sel = document.getElementById('gcal-calendar');
@@ -836,7 +852,7 @@
                 const primary = gcal.calendars.find(c => c.primary);
                 sel.value = gcal.calendars.some(c => c.id === saved) ? saved : (primary ? primary.id : sel.value);
                 document.getElementById('gcal-pull').disabled = gcal.calendars.length === 0;
-                gcalSetStatus(`เชื่อมต่อแล้ว พบ ${gcal.calendars.length} ปฏิทิน`);
+                gcalSetStatus(`Connected. Found ${gcal.calendars.length} calendars`);
             } catch (err) {
                 gcalSetStatus(err.message, true);
             }
@@ -846,7 +862,7 @@
             if (state.locked) { notifyLocked(); return; }
             const clientId = document.getElementById('gcal-client-id').value.trim();
             const calId = document.getElementById('gcal-calendar').value;
-            if (!clientId || !calId) return gcalSetStatus('กรุณาเชื่อมต่อและเลือกปฏิทินก่อน', true);
+            if (!clientId || !calId) return gcalSetStatus('Please connect and select a calendar first', true);
             gcalSaveSettings({ clientId, calendarId: calId });
             const cal = gcal.calendars.find(c => c.id === calId);
             const calName = gcalClean((cal && (cal.summaryOverride || cal.summary)) || calId);
@@ -855,7 +871,7 @@
             const timeMin = toDate(startKey).toISOString();
             const timeMax = toDate(shiftDateKey(endKey, 1)).toISOString();
             try {
-                gcalSetStatus('กำลังดึงอีเวนท์...');
+                gcalSetStatus('Pulling events...');
                 const items = [];
                 let pageToken = '';
                 do {
@@ -871,23 +887,23 @@
                     layer = { id: `track-gcal-${Date.now()}`, name: calName, icon: 'fa-calendar-days', color: 'border-blue-500 text-blue-400', gcalCalendarId: calId };
                     state.layers.push(layer);
                 }
-                // แทนที่อีเวนท์ที่เคยซิงค์จากปฏิทินนี้ (อีเวนท์ที่สร้างเองไม่ถูกแตะ)
+                // Replace events previously synced from this calendar (manually created events are untouched)
                 state.events = state.events.filter(e => !(e.source === 'gcal' && e.gcalCalendarId === calId));
 
                 let added = 0, addedAllDay = 0;
                 items.forEach(it => {
                     if (it.status === 'cancelled') return;
                     if (it.start && it.start.date && it.end && it.end.date) {
-                        // อีเวนท์ทั้งวัน: Google ให้มาเป็นวันที่ล้วน (ไม่มีเวลา/โซนเวลา) ใช้ค่าตรงตามนั้น
+                        // All-day events: Google returns plain dates (no time/timezone), so use them as-is
                         let key = it.start.date;
                         while (key < it.end.date) {
                             if (key >= startKey && key <= endKey) {
                                 state.events.push({
                                     id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
                                     source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
-                                    label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
+                                    label: gcalClean(it.summary) || '(No title)',
                                     detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 4096),
-                                    comment: it.location ? `สถานที่: ${gcalClean(it.location)}` : '',
+                                    comment: it.location ? `Location: ${gcalClean(it.location)}` : '',
                                     allDay: true, showTime: false,
                                     start: 0, duration: 86400,
                                     color: layer.color, alert: 0
@@ -910,9 +926,9 @@
                             state.events.push(clampEventToDay({
                                 id: `gcal-${String(it.id).replace(/[^\w-]/g, '')}-${key}`,
                                 source: 'gcal', gcalCalendarId: calId, date: key, layerId: layer.id,
-                                label: gcalClean(it.summary) || '(ไม่มีชื่อ)',
+                                label: gcalClean(it.summary) || '(No title)',
                                 detail: gcalClean(it.description).replace(/\s*\n\s*/g, ' ').trim().slice(0, 4096),
-                                comment: it.location ? `สถานที่: ${gcalClean(it.location)}` : '',
+                                comment: it.location ? `Location: ${gcalClean(it.location)}` : '',
                                 showTime: true,
                                 start: Math.round((segS - day) / 1000),
                                 duration: Math.max(1, Math.round((segE - segS) / 1000)),
@@ -924,7 +940,7 @@
                     }
                 });
                 renderTimeline();
-                const msg = `ดึงสำเร็จ ${added} รายการ` + (addedAllDay ? ` (ทั้งวัน ${addedAllDay} รายการ)` : '');
+                const msg = `Pulled ${added} events` + (addedAllDay ? ` (${addedAllDay} all-day)` : '');
                 gcalSetStatus(msg);
                 showToast(msg, 'emerald');
             } catch (err) {
@@ -937,16 +953,16 @@
             <div id="gcal-modal" class="hidden fixed inset-0 z-[60] bg-black/70 items-center justify-center p-4">
                 <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 w-full max-w-md space-y-3 text-slate-200">
                     <div class="flex items-center justify-between">
-                        <h3 class="font-semibold text-base"><i class="fa-brands fa-google text-sky-400 mr-2"></i>ซิงค์ Google Calendar</h3>
+                        <h3 class="font-semibold text-base"><i class="fa-brands fa-google text-sky-400 mr-2"></i>Sync Google Calendar</h3>
                         <button id="gcal-close" class="text-slate-400 hover:text-white px-2"><i class="fa-solid fa-xmark"></i></button>
                     </div>
-                    <label class="block text-xs text-slate-400">Google OAuth Client ID (เก็บในเบราว์เซอร์นี้เท่านั้น)</label>
+                    <label class="block text-xs text-slate-400">Google OAuth Client ID (stored in this browser only)</label>
                     <input id="gcal-client-id" type="text" placeholder="xxxx.apps.googleusercontent.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-500">
-                    <button id="gcal-connect" class="w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-medium transition">เชื่อมต่อ / โหลดรายการปฏิทิน</button>
-                    <label class="block text-xs text-slate-400">ปฏิทินที่ต้องการดึง</label>
+                    <button id="gcal-connect" class="w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-medium transition">Connect / Load Calendar List</button>
+                    <label class="block text-xs text-slate-400">Calendar to pull from</label>
                     <select id="gcal-calendar" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"></select>
                     <p id="gcal-range" class="text-xs text-slate-500"></p>
-                    <button id="gcal-pull" disabled class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-lg text-sm font-semibold transition">ดึงอีเวนท์เข้าไทม์ไลน์</button>
+                    <button id="gcal-pull" disabled class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-lg text-sm font-semibold transition">Pull Events into Timeline</button>
                     <div id="gcal-status" class="text-[13px] min-h-[20px] text-slate-400"></div>
                 </div>
             </div>`);
@@ -954,7 +970,7 @@
             const setOpen = (open) => { modal.classList.toggle('hidden', !open); modal.classList.toggle('flex', open); };
             document.getElementById('btn-gcal').addEventListener('click', () => {
                 document.getElementById('gcal-client-id').value = gcalSettings().clientId || '';
-                document.getElementById('gcal-range').textContent = `ช่วงที่ดึง: ${windowStartKey()} ถึง ${windowEndKey()} • ข้ามอีเวนท์ทั้งวัน • อีเวนท์ที่ซิงค์จากปฏิทินนี้จะถูกแทนที่ทุกครั้งที่ดึง`;
+                document.getElementById('gcal-range').textContent = `Range: ${windowStartKey()} to ${windowEndKey()} • All-day events skipped • Events synced from this calendar are replaced on every pull`;
                 setOpen(true);
                 gcalLoadGis().catch(() => {});
             });
@@ -1095,7 +1111,7 @@ function initCharCounters() {
 
             elements.layerHeadersContainer.innerHTML = '';
             elements.layersContainer.innerHTML = '';
-            elements.trackCount.textContent = `${state.layers.length} เลเยอร์`;
+            elements.trackCount.textContent = `${state.layers.length} layers`;
 
             const totalWidth = 86400 * state.pxPerSecond;
 
@@ -1112,7 +1128,7 @@ function initCharCounters() {
                         <i class="fa-solid ${layer.icon} text-base opacity-90"></i>
                         <span class="font-semibold text-[15px] truncate text-slate-200">${layer.name}</span>
                     </div>
-                    <button class="btn-layer-settings text-slate-500 hover:text-slate-200 transition p-1.5 rounded-lg hover:bg-slate-800" title="ตั้งค่าเลเยอร์ (${layer.name})">
+                    <button class="btn-layer-settings text-slate-500 hover:text-slate-200 transition p-1.5 rounded-lg hover:bg-slate-800" title="Layer settings (${layer.name})">
                         <i class="fa-solid fa-gear text-sm"></i>
                     </button>
                 `;
@@ -1224,23 +1240,13 @@ function initCharCounters() {
                         <i class="fa-solid ${evt.allDay ? 'fa-calendar-day' : 'fa-play'} text-[8px] ${evt.allDay ? 'text-sky-300' : 'text-emerald-300'}"></i>
                     </div>` : ''}
                     <div class="truncate">
-                        ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.allDay ? 'ทั้งวัน · ' : ''}${evt.label}${evt.detail ? ' <span class="font-normal text-[12px] opacity-80 normal-case">' + evt.detail + '</span>' : ''}</div>` : ''}
+                        ${!isUltraCompact ? `<div class="font-bold text-[15px] truncate tracking-wide uppercase">${evt.allDay ? 'All day · ' : ''}${evt.label}${evt.detail ? ' <span class="font-normal text-[12px] opacity-80 normal-case">' + evt.detail + '</span>' : ''}</div>` : ''}
                         ${!isVeryCompact && evt.showTime !== false ? `<div class="text-[12px] opacity-90 font-mono">${startTimeStr} - ${endTimeStr}</div>` : ''}
                     </div>
                 </div>
 
                 ${!evt.allDay ? `<div class="resize-handle absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/40 rounded-r-lg"></div>` : ''}
             `;
-
-            clip.addEventListener('mouseenter', (e) => {
-                showEventTooltip(evt, e);
-            });
-            clip.addEventListener('mousemove', (e) => {
-                positionEventTooltip(e);
-            });
-            clip.addEventListener('mouseleave', () => {
-                hideEventTooltip();
-            });
 
             clip.addEventListener('click', (e) => {
                 if (e.target.classList.contains('resize-handle')) return;
@@ -1262,10 +1268,21 @@ function initCharCounters() {
                     }
                 }
                 refreshClipSelection();
+
+                // Click/tap to view "Event / Details / Location" only while Hide Tools is active (view-only mode)
+                // Click the same event again to close
+                if (toolsAreHidden()) {
+                    if (openTooltipEventId === evt.id) {
+                        hideEventTooltip();
+                    } else {
+                        showEventTooltip(evt, e);
+                    }
+                }
             });
 
             clip.addEventListener('dblclick', (e) => {
                 e.stopPropagation();
+                hideEventTooltip();
                 openEventModal(evt);
             });
 
@@ -1280,16 +1297,19 @@ function initCharCounters() {
             return div.innerHTML;
         }
 
+        let openTooltipEventId = null;
+
         function showEventTooltip(evt, e) {
+            openTooltipEventId = evt.id;
             const rows = [
-                ['รายการ:', evt.label],
-                ['รายละเอียด:', evt.detail],
-                ['สถานที่:', evt.comment]
+                ['Event:', evt.label],
+                ['Details:', evt.detail],
+                ['Location:', evt.comment]
             ].filter(([, val]) => val && String(val).trim());
             elements.eventTooltip.innerHTML = rows.map(([labelText, val]) => `
-                <div class="text-[12px]">
-                    <span class="text-slate-400 font-semibold">${labelText}</span>
-                    <span class="text-slate-100 whitespace-pre-wrap break-words">${escapeHtml(val)}</span>
+                <div class="text-[15px]">
+                    <span class="font-semibold" style="color: #475569">${labelText}</span>
+                    <span class="whitespace-pre-wrap break-words" style="color: #0f172a">${escapeHtml(val)}</span>
                 </div>
             `).join('');
             elements.eventTooltip.classList.add('visible');
@@ -1305,7 +1325,7 @@ function initCharCounters() {
             let x = e.clientX;
             x = Math.min(Math.max(x, margin + tipWidth / 2), window.innerWidth - margin - tipWidth / 2);
 
-            // ถ้าข้อความยาวจนพื้นที่เหนือเคอร์เซอร์ไม่พอ ให้แสดงด้านล่างเคอร์เซอร์แทน กันข้อความโดนตัดขาดเหนือจอ
+            // If the text is too long to fit above the cursor, show it below the cursor instead to avoid being cut off on screen
             const showBelow = (e.clientY - 14 - tipHeight) < margin;
             tip.classList.toggle('tooltip-below', showBelow);
 
@@ -1318,10 +1338,11 @@ function initCharCounters() {
         }
 
         function hideEventTooltip() {
+            openTooltipEventId = null;
             elements.eventTooltip.classList.remove('visible');
         }
 
-        // --- Custom "สีสัญลักษณ์" dropdown with a small color-swatch square before each label ---
+        // --- Custom "Symbol Color" dropdown with a small color-swatch square before each label ---
         function initEventColorPicker() {
             const options = Array.from(elements.eventColorSelect.options).map(opt => ({
                 value: opt.value,
@@ -1586,9 +1607,9 @@ function initCharCounters() {
                         <i class="fa-solid fa-clock text-sm animate-bounce"></i>
                     </div>
                     <div>
-                        <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">CUE WARNING (อีก ${seconds} วินาที)</div>
+                        <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">CUE WARNING (in ${seconds}s)</div>
                         <div class="font-bold text-xs truncate max-w-[200px]">${evt.label}</div>
-                        <div class="text-[10px] text-slate-400 font-mono">เวลาออกอากาศ ${secondsToTimecode(evt.start)}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">On air at ${secondsToTimecode(evt.start)}</div>
                     </div>
                 </div>
                 <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -1606,7 +1627,7 @@ function initCharCounters() {
                         <i class="fa-solid fa-tower-cell text-sm animate-pulse"></i>
                     </div>
                     <div>
-                        <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">ON AIR NOW (กำลังออกอากาศ)</div>
+                        <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">ON AIR NOW (On Air)</div>
                         <div class="font-bold text-xs truncate max-w-[200px]">${evt.label}</div>
                     </div>
                 </div>
@@ -1663,7 +1684,7 @@ function initCharCounters() {
         function activatePasteMode() {
             if (state.locked) { notifyLocked(); return; }
             if (state.selectedEvents.size === 0 && state.events.length > 0 && !(state._pasteData && state._pasteData.events && state._pasteData.events.length)) {
-                showToast('กรุณาเลือกอีเวนท์ก่อน Copy', 'amber');
+                showToast('Select an event before Copy', 'amber');
                 return;
             }
             state.pasteMode = true;
@@ -1673,8 +1694,8 @@ function initCharCounters() {
             banner.className = 'paste-mode-banner fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-cyan-600 text-white px-5 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-bold border border-cyan-400';
             banner.innerHTML = `
                 <i class="fa-solid fa-paste"></i>
-                โหมดวาง (PASTE) — คลิกบนไทม์ไลน์เพื่อกำหนดตำแหน่ง
-                <button id="btn-cancel-paste" class="ml-2 px-2 py-0.5 bg-cyan-800 hover:bg-cyan-700 rounded-lg transition text-[10px]">ยกเลิก (ESC)</button>
+                PASTE MODE — click on the timeline to place events
+                <button id="btn-cancel-paste" class="ml-2 px-2 py-0.5 bg-cyan-800 hover:bg-cyan-700 rounded-lg transition text-[10px]">Cancel (ESC)</button>
             `;
             document.body.appendChild(banner);
 
@@ -1734,7 +1755,7 @@ function initCharCounters() {
 
             deactivatePasteMode();
             renderTimeline();
-            showToast(`วาง ${copiedEvents.length} อีเวนท์ลงวันที่ ${state.viewDate} เรียบร้อย (เวลาเดิมคงเดิม)`, 'cyan');
+            showToast(`Pasted ${copiedEvents.length} events to ${state.viewDate} (original times kept)`, 'cyan');
         }
 
         function renderIconPickerGrid(selectedIconClass) {
@@ -1762,7 +1783,7 @@ function initCharCounters() {
             elements.layerModal.classList.remove('hidden');
 
             if (layer) {
-                elements.layerModal.querySelector('h3').textContent = 'ตั้งค่าช่องสัญญาณ (Layer Settings)';
+                elements.layerModal.querySelector('h3').textContent = 'Channel Settings (Layer Settings)';
                 document.getElementById('layer-id').value = layer.id;
                 elements.layerNameInput.value = layer.name;
                 elements.layerIconInput.value = layer.icon || 'fa-tv';
@@ -1770,7 +1791,7 @@ function initCharCounters() {
                 elements.btnDeleteLayer.classList.remove('hidden');
                 renderIconPickerGrid(layer.icon || 'fa-tv');
             } else {
-                elements.layerModal.querySelector('h3').textContent = 'เพิ่มช่องสัญญาณใหม่ (New Layer)';
+                elements.layerModal.querySelector('h3').textContent = 'Add New Channel (New Layer)';
                 elements.layerForm.reset();
                 document.getElementById('layer-id').value = '';
                 elements.layerIconInput.value = 'fa-tv';
@@ -1833,7 +1854,7 @@ function initCharCounters() {
             ).join('');
 
             if (evt) {
-                document.getElementById('modal-title').textContent = 'แก้ไขรายการออกอากาศ';
+                document.getElementById('modal-title').textContent = 'Edit Broadcast Item';
                 document.getElementById('event-id').value = evt.id;
                 document.getElementById('event-layer').value = evt.layerId;
                 document.getElementById('event-label').value = evt.label;
@@ -1851,7 +1872,7 @@ function initCharCounters() {
                 updateCharCounters();
                 elements.btnDeleteEvent.classList.remove('hidden');
             } else {
-                document.getElementById('modal-title').textContent = 'เพิ่มรายการออกอากาศใหม่';
+                document.getElementById('modal-title').textContent = 'Add New Broadcast Item';
                 elements.eventForm.reset();
                 document.getElementById('event-id').value = '';
                 updateCharCounters();
@@ -1912,7 +1933,7 @@ function initCharCounters() {
             const startSec = timecodeToSeconds(elements.eventStartTimecode.value);
             const duration = parseFloat(elements.eventDuration.value);
 
-            if (startSec + duration > 86400) showToast('อีเวนท์ต้องจบภายใน 24:00 ระบบปรับระยะเวลาให้อัตโนมัติ', 'amber');
+            if (startSec + duration > 86400) showToast('Events must end by 24:00; duration adjusted automatically', 'amber');
             const existingEvt = id ? state.events.find(e => e.id === id) : null;
             const eventData = {
                 id: id || `evt-${Date.now()}`,
@@ -1999,10 +2020,10 @@ function initCharCounters() {
             state.audioEnabled = !state.audioEnabled;
             if (state.audioEnabled) {
                 elements.audioIcon.className = 'fa-solid fa-volume-high text-emerald-400';
-                elements.audioStatusText.textContent = 'เปิดเสียงเตือน';
+                elements.audioStatusText.textContent = 'Alert Sound ON';
             } else {
                 elements.audioIcon.className = 'fa-solid fa-volume-xmark text-slate-500';
-                elements.audioStatusText.textContent = 'ปิดเสียงเตือน';
+                elements.audioStatusText.textContent = 'Alert Sound OFF';
             }
         });
 
@@ -2062,7 +2083,7 @@ function initCharCounters() {
         elements.btnUndo.addEventListener('click', () => {
             if (state.locked) { notifyLocked(); return; }
             if (state.undoHistory.length === 0) {
-                showToast('ไม่มีอะไรให้ Undo', 'amber');
+                showToast('Nothing to Undo', 'amber');
                 return;
             }
             const prev = state.undoHistory.pop();
@@ -2070,13 +2091,13 @@ function initCharCounters() {
             state.layers = prev.layers;
             state.selectedEvents.clear();
             renderTimeline();
-            showToast('Undo สำเร็จ', 'blue');
+            showToast('Undo done', 'blue');
         });
 
         elements.btnDelete.addEventListener('click', () => {
             if (state.locked) { notifyLocked(); return; }
             if (state.selectedEvents.size === 0) {
-                showToast('กรุณาเลือกอีเวนท์ที่ต้องการลบ', 'amber');
+                showToast('Select the events you want to delete', 'amber');
                 return;
             }
             saveUndoState();
@@ -2084,7 +2105,7 @@ function initCharCounters() {
             state.events = state.events.filter(evt => !state.selectedEvents.has(evt.id));
             state.selectedEvents.clear();
             renderTimeline();
-            showToast(`ลบ ${count} อีเวนท์เรียบร้อย`, 'red');
+            showToast(`Deleted ${count} events`, 'red');
         });
 
         document.addEventListener('keydown', (e) => {
@@ -2100,7 +2121,7 @@ function initCharCounters() {
                 state.events = state.events.filter(evt => !state.selectedEvents.has(evt.id));
                 state.selectedEvents.clear();
                 renderTimeline();
-                showToast(`ลบ ${count} อีเวนท์เรียบร้อย`, 'red');
+                showToast(`Deleted ${count} events`, 'red');
             }
         });
 
@@ -2108,6 +2129,7 @@ function initCharCounters() {
             if (!e.target.closest('.clip-glow') && !state.pasteMode) {
                 state.selectedEvents.clear();
                 refreshClipSelection();
+                hideEventTooltip();
             }
         });
 
@@ -2123,7 +2145,7 @@ function initCharCounters() {
 
         elements.btnCopyTimeline.addEventListener('click', () => {
             if (state.selectedEvents.size === 0) {
-                showToast('กรุณาคลิกเลือกอีเวนท์ที่ต้องการ copy ก่อน', 'amber');
+                showToast('Click to select the events you want to copy first', 'amber');
                 return;
             }
             const selectedArr = [];
@@ -2144,7 +2166,7 @@ function initCharCounters() {
             document.execCommand('copy');
             document.body.removeChild(ta);
             state._copiedData = copyData;
-            showToast(`Copy ${selectedArr.length} อีเวนท์เรียบร้อย กด Paste แล้วคลิกตำแหน่งบนไทม์ไลน์`, 'emerald');
+            showToast(`Copied ${selectedArr.length} events. Press Paste, then click a spot on the timeline`, 'emerald');
         });
 
         elements.btnPasteTimeline.addEventListener('click', () => {
@@ -2153,7 +2175,7 @@ function initCharCounters() {
                 activatePasteMode();
                 return;
             }
-            showToast('ยังไม่ได้ Copy อะไร กรุณากด Copy ก่อน', 'amber');
+            showToast('Nothing copied yet. Press Copy first', 'amber');
         });
 
         document.addEventListener('paste', (e) => {
@@ -2165,7 +2187,7 @@ function initCharCounters() {
                 const pasteData = JSON.parse(text);
                 if (pasteData.events && Array.isArray(pasteData.events)) {
                     state._pasteData = pasteData;
-                    showToast(`พร้อมวาง ${pasteData.events.length} อีเวนท์ — คลิกตำแหน่งบนไทม์ไลน์`, 'cyan');
+                    showToast(`Ready to paste ${pasteData.events.length} events — click a spot on the timeline`, 'cyan');
                 }
             } catch (err) {}
         });
@@ -2179,7 +2201,7 @@ function initCharCounters() {
                 try {
                     const imported = JSON.parse(event.target.result);
                     if (imported.layers && imported.events) {
-                        if (!confirm('นำเข้าไฟล์นี้จะแทนที่ข้อมูลปัจจุบันทั้งหมด (กด Undo ย้อนกลับได้) ต้องการดำเนินการต่อหรือไม่?')) {
+                        if (!confirm('Importing this file will replace ALL current data (Undo can revert it). Continue?')) {
                             elements.importFileInput.value = '';
                             return;
                         }
@@ -2190,7 +2212,7 @@ function initCharCounters() {
                         renderTimeline();
                     }
                 } catch (err) {
-                    alert('ไฟล์ JSON ไม่ถูกต้อง');
+                    alert('Invalid JSON file');
                 }
             };
             reader.readAsText(file);
