@@ -88,7 +88,6 @@
   .info-pop .close-hint{margin:9px 0 0;font-size:.66rem;color:#9AA0A8;text-align:center;}
   body.view-mode .palette,
   body.view-mode #connectBtn,
-  body.view-mode #clearBtn,
   body.view-mode #importBtn{display:none;}
   body.view-mode .node{cursor:default;}
   #viewToggle.active{border-color:var(--amber);color:var(--amber);}
@@ -117,7 +116,6 @@
 <div class="toolbar">
   <button class="tb" id="viewToggle">👁️ โหมดดูอย่างเดียว</button>
   <button class="tb" id="connectBtn">🔗 เชื่อมเส้น</button>
-  <button class="tb" id="clearBtn">🗑️ ล้างทั้งหมด</button>
   <button class="tb" id="importBtn">📂 Import</button>
   <button class="tb" id="exportBtn">💾 Export</button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
@@ -507,9 +505,6 @@ document.getElementById('connectBtn').onclick = (e)=>{
   e.target.classList.toggle('active', connectMode);
   document.getElementById('hint').textContent = connectMode ? 'คลิกโหนดต้นทาง แล้วคลิกโหนดปลายทาง เพื่อวาดเส้น' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด';
   render();
-};
-document.getElementById('clearBtn').onclick = ()=>{
-  if(confirm('ล้างทั้งหมดจริงหรือไม่?')){ nodes=[]; edges=[]; pendingFrom=null; selectedEdge=null; selectedNode=null; render(); save(); }
 };
 
 function sanitizeNodes(list){
