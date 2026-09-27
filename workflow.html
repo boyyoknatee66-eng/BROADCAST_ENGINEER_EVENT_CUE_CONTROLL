@@ -47,6 +47,8 @@
   .node .title{fill:var(--text);font-size:13px;font-weight:700;font-family:inherit;}
   .node .ic{color:var(--teal);}
   .edge{stroke:#5A6270;stroke-width:1.6;fill:none;marker-end:url(#arrow);cursor:pointer;}
+  .edge-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer;}
+  body.view-mode .edge-hit{pointer-events:none;}
   .edge.pending{stroke:var(--teal);stroke-dasharray:4 3;}
   .node .fmt{fill:var(--amber);font-size:10px;font-family:inherit;}
   .modal-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:60;align-items:center;justify-content:center;padding:16px;}
@@ -86,7 +88,6 @@
   .info-pop .close-hint{margin:9px 0 0;font-size:.66rem;color:#9AA0A8;text-align:center;}
   body.view-mode .palette,
   body.view-mode #connectBtn,
-  body.view-mode #delEdgeBtn,
   body.view-mode #clearBtn,
   body.view-mode #importBtn{display:none;}
   body.view-mode .node{cursor:default;}
@@ -116,12 +117,11 @@
 <div class="toolbar">
   <button class="tb" id="viewToggle">👁️ โหมดดูอย่างเดียว</button>
   <button class="tb" id="connectBtn">🔗 เชื่อมเส้น</button>
-  <button class="tb" id="delEdgeBtn">✂️ ลบเส้นที่เลือก</button>
   <button class="tb" id="clearBtn">🗑️ ล้างทั้งหมด</button>
   <button class="tb" id="importBtn">📂 Import</button>
   <button class="tb" id="exportBtn">💾 Export</button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
-  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกโหนดแล้วกด Delete เพื่อลบ</span>
+  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกโหนด/เส้นแล้วกด Delete เพื่อลบ</span>
 </div>
 
 <div class="modal-back" id="nodeModal">
@@ -363,7 +363,9 @@ function showInfo(n){
 function hideInfo(){ pop.classList.remove('open'); infoNode = null; }
 boardEl.addEventListener('click', ()=>{
   if(infoNode) hideInfo();
-  if(selectedNode){ selectedNode = null; render(); }
+  const had = selectedNode || selectedEdge;
+  selectedNode = null; selectedEdge = null;
+  if(had) render();
 });
 
 function buildPalette(){
@@ -407,10 +409,18 @@ function render(){
   edges.forEach(e=>{
     const a = nodes.find(n=>n.id===e.from), b = nodes.find(n=>n.id===e.to);
     if(!a||!b) return;
+    const d = edgePath(a,b);
+    const pick = (ev)=>{ if(viewMode) return; ev.stopPropagation(); selectedEdge = (selectedEdge===e)?null:e; selectedNode=null; render(); };
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('class','edge'+(selectedEdge===e?' pending':''));
-    path.setAttribute('d', edgePath(a,b));
-    path.onclick = (ev)=>{ if(viewMode) return; ev.stopPropagation(); selectedEdge = (selectedEdge===e)?null:e; render(); };
+    path.setAttribute('d', d);
+    path.onclick = pick;
+    svgEdges.appendChild(path);
+    const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
+    hit.setAttribute('class','edge-hit');
+    hit.setAttribute('d', d);
+    hit.onclick = pick;
+    svgEdges.appendChild(hit);
     svgEdges.appendChild(path);
   });
   nodes.forEach(n=>{
@@ -487,7 +497,7 @@ function setViewMode(on){
   const btn = document.getElementById('viewToggle');
   btn.classList.toggle('active', viewMode);
   btn.textContent = viewMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
-  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกโหนดแล้วกด Delete เพื่อลบ';
+  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกโหนด/เส้นแล้วกด Delete เพื่อลบ';
   render();
 }
 document.getElementById('viewToggle').onclick = ()=> setViewMode(!viewMode);
@@ -497,9 +507,6 @@ document.getElementById('connectBtn').onclick = (e)=>{
   e.target.classList.toggle('active', connectMode);
   document.getElementById('hint').textContent = connectMode ? 'คลิกโหนดต้นทาง แล้วคลิกโหนดปลายทาง เพื่อวาดเส้น' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด';
   render();
-};
-document.getElementById('delEdgeBtn').onclick = ()=>{
-  if(selectedEdge){ edges = edges.filter(e=>e!==selectedEdge); selectedEdge=null; render(); save(); }
 };
 document.getElementById('clearBtn').onclick = ()=>{
   if(confirm('ล้างทั้งหมดจริงหรือไม่?')){ nodes=[]; edges=[]; pendingFrom=null; selectedEdge=null; selectedNode=null; render(); save(); }
