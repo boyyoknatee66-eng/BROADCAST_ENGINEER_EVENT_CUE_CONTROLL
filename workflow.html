@@ -8,6 +8,7 @@
   :root{
     --bg:#0D0F12; --panel:#171A1F; --panel2:#1E2229; --line:#3A3F47;
     --amber:#F2A93B; --teal:#4FD1C5; --violet:#B694F7; --text:#E9E7E2; --sub:#9AA0A8;
+    --yellow:#FFD43B; --pink:#FF6FA5; --red:#E63946; --orange:#FF922B;
     box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   }
@@ -38,15 +39,54 @@
   .node.cat-src rect{stroke:var(--violet);}
   .node.cat-core rect{stroke:var(--teal);}
   .node.cat-out rect{stroke:var(--amber);}
+  .node.cat-net rect{stroke:var(--yellow);}
+  .node.cat-prod rect{stroke:var(--pink);}
+  .node.cat-mam rect{stroke:var(--red);}
+  .node.cat-dev rect{stroke:var(--orange);}
   .node.selected rect{stroke:var(--amber);stroke-width:2.4;}
   .node .title{fill:var(--text);font-size:13px;font-weight:700;font-family:inherit;}
-  .node .subtitle{fill:var(--sub);font-size:10.5px;font-family:inherit;}
   .node .ic{color:var(--teal);}
   .node .del{cursor:pointer;}
   .node .del circle{fill:#2A2020;stroke:var(--line);}
   .node .del text{fill:#E77;font-size:11px;font-family:inherit;}
   .edge{stroke:#5A6270;stroke-width:1.6;fill:none;marker-end:url(#arrow);cursor:pointer;}
   .edge.pending{stroke:var(--teal);stroke-dasharray:4 3;}
+  .node .fmt{fill:var(--amber);font-size:10px;font-family:inherit;}
+  .modal-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:60;align-items:center;justify-content:center;padding:16px;}
+  .modal-back.open{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(430px,100%);max-height:88vh;overflow:auto;padding:16px 16px 14px;box-shadow:0 20px 48px rgba(0,0,0,.55);}
+  .modal h3{margin:0 0 14px;font-size:1rem;}
+  .field{margin-bottom:14px;}
+  .flabel{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--sub);margin-bottom:6px;}
+  .field input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 11px;font-size:.86rem;font-family:inherit;}
+  .field input[type=text]:focus{outline:none;border-color:var(--amber);}
+  .chgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 10px;}
+  .ch-row{display:flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 7px;min-width:0;}
+  .ch-row span{font-size:.74rem;font-weight:700;color:var(--teal);flex:none;}
+  .ch-row select{flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-size:.72rem;font-family:inherit;padding:3px 1px;cursor:pointer;text-overflow:ellipsis;}
+  .ch-row select:focus{outline:none;}
+  .ch-row select option{background:#1E2229;color:var(--text);}
+  .ch-row.off{opacity:.55;}
+  .ch-row.off span{color:var(--sub);}
+  .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+  .info-pop{display:none;position:absolute;z-index:20;width:270px;background:#fff;color:#141414;
+    border-radius:12px;padding:12px 14px 11px;cursor:default;
+    box-shadow:0 1px 2px rgba(0,0,0,.12),0 8px 16px rgba(0,0,0,.18),0 22px 44px rgba(0,0,0,.28);}
+  .info-pop.open{display:block;animation:popLift .2s cubic-bezier(.2,.7,.3,1) both;}
+  @keyframes popLift{
+    from{opacity:0;transform:perspective(800px) translateY(14px) rotateX(12deg);transform-origin:top center;}
+    to{opacity:1;transform:perspective(800px) translateY(-4px) rotateX(0deg);transform-origin:top center;}
+  }
+  .info-pop::before{content:"";position:absolute;top:-6px;left:50%;margin-left:-7px;width:14px;height:14px;background:#fff;transform:rotate(45deg);border-radius:3px;box-shadow:-3px -3px 8px rgba(0,0,0,.10);}
+  .info-pop h4{margin:0;font-size:.95rem;color:#111;line-height:1.25;display:flex;align-items:center;gap:7px;}
+  .info-pop h4 .dot{width:9px;height:9px;border-radius:3px;flex:none;}
+  .info-pop h4 + dl{margin-top:9px;}
+  .info-pop dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 10px;align-items:baseline;
+    border-top:1px solid #E6E8EB;padding-top:8px;}
+  .info-pop dt{font-size:.66rem;letter-spacing:.5px;text-transform:uppercase;color:#8A9099;white-space:nowrap;}
+  .info-pop dt.sect{grid-column:1 / -1;margin-top:7px;padding-top:8px;border-top:1px solid #EDEFF1;color:#6B7280;font-weight:700;}
+  .info-pop dd{margin:0;font-size:.8rem;font-weight:600;color:#141414;text-align:right;word-break:break-word;}
+  .info-pop .close-hint{margin:9px 0 0;font-size:.66rem;color:#9AA0A8;text-align:center;}
   body.view-mode .palette,
   body.view-mode #connectBtn,
   body.view-mode #delEdgeBtn,
@@ -73,6 +113,7 @@
       <g id="edges"></g>
       <g id="nodes"></g>
     </svg>
+    <div class="info-pop" id="infoPop"></div>
   </div>
 </div>
 <div class="toolbar">
@@ -80,73 +121,100 @@
   <button class="tb" id="connectBtn">🔗 เชื่อมเส้น</button>
   <button class="tb" id="delEdgeBtn">✂️ ลบเส้นที่เลือก</button>
   <button class="tb" id="clearBtn">🗑️ ล้างทั้งหมด</button>
-  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อแก้ไขชื่อ</span>
+  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท</span>
+</div>
+
+<div class="modal-back" id="nodeModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h3 id="mTitle">รายละเอียดโหนด</h3>
+    <div class="field">
+      <span class="flabel">ชื่อโหนด</span>
+      <input type="text" id="fName" autocomplete="off">
+    </div>
+    <div class="field">
+      <span class="flabel">Video</span>
+      <input type="text" id="fVideo" autocomplete="off">
+    </div>
+    <div class="field">
+      <span class="flabel">Audio channels</span>
+      <div class="chgrid" id="fChips"></div>
+    </div>
+    <div class="actions">
+      <button class="tb" id="mCancel" type="button">ยกเลิก</button>
+      <button class="tb active" id="mSave" type="button">บันทึก</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const ICONS = {
-  studio:'<circle cx="12" cy="9" r="3"/><path d="M4 20l3-9h10l3 9" fill="none"/>',
-  camera:'<rect x="3" y="7" width="14" height="10" rx="2"/><path d="M17 10l4-2v8l-4-2z"/><circle cx="10" cy="12" r="2.4" fill="none"/>',
-  crane:'<circle cx="18" cy="6" r="2.4"/><path d="M18 8v3l-11 6" fill="none"/><rect x="2" y="16" width="7" height="5" rx="1"/>',
   obvan:'<rect x="2" y="10" width="14" height="7" rx="1"/><path d="M16 12h4l2 3v2h-6z"/><circle cx="6.5" cy="18.5" r="1.6"/><circle cx="17" cy="18.5" r="1.6"/>',
   location:'<path d="M12 21s7-7.2 7-12a7 7 0 10-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4" fill="var(--bg)"/>',
-  event:'<path d="M3 9l9-6 9 6" fill="none"/><rect x="5" y="9" width="14" height="10" rx="1"/>',
-  news:'<rect x="9" y="2" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4M9 21h6" fill="none"/>',
-  live:'<circle cx="12" cy="12" r="2.6"/><path d="M7 8a7 7 0 000 8M17 8a7 7 0 010 8M4 5a11 11 0 000 14M20 5a11 11 0 010 14" fill="none"/>',
   ingest:'<rect x="4" y="10" width="16" height="9" rx="2" fill="none"/><path d="M12 2v10M8 9l4 4 4-4" fill="none"/>',
+  daft:'<circle cx="12" cy="12" r="6.5" fill="none"/><circle cx="12" cy="12" r="2.2" fill="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1" fill="none"/>',
+  rec:'<circle cx="12" cy="12" r="9" fill="none"/><circle cx="12" cy="12" r="5"/>',
+  aveco:'<rect x="2.5" y="5" width="19" height="14" rx="3" fill="none"/><path d="M10 9.5l5 2.5-5 2.5z"/>',
+  marina:'<ellipse cx="12" cy="6" rx="7.5" ry="3" fill="none"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6" fill="none"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" fill="none"/>',
+  prodrive:'<rect x="3" y="4" width="18" height="6.5" rx="1.5" fill="none"/><rect x="3" y="13.5" width="18" height="6.5" rx="1.5" fill="none"/><circle cx="7" cy="7.2" r="1.2"/><circle cx="7" cy="16.7" r="1.2"/>',
   social:'<circle cx="6" cy="12" r="2.3"/><circle cx="17" cy="6" r="2.3"/><circle cx="17" cy="18" r="2.3"/><path d="M8.1 10.7L14.9 7.1M8.1 13.3l6.8 3.6" fill="none"/>',
   facebook_thairath:'<rect x="4" y="3" width="16" height="18" rx="2" fill="none"/><path d="M8 8h8M8 12h8M8 16h5" fill="none"/>',
   youtube_thairath:'<rect x="3" y="6" width="18" height="12" rx="3" fill="none"/><path d="M10 9.5l6 2.5-6 2.5z"/>',
   tv:'<rect x="3" y="6" width="18" height="12" rx="2" fill="none"/><path d="M8 3l4 3 4-3M7 21h10" fill="none"/>',
   satellite:'<path d="M3 13a10 10 0 0110-10" fill="none"/><path d="M3 13l7 7" fill="none"/><circle cx="17" cy="17" r="2"/><path d="M17 17L21 21" fill="none"/>',
-  scr:'<rect x="3" y="4" width="18" height="16" rx="2" fill="none"/><path d="M7 8v4M12 6v6M17 9v3" fill="none"/><circle cx="7" cy="14" r="1.3"/><circle cx="12" cy="16" r="1.3"/><circle cx="17" cy="13" r="1.3"/>',
-  mixer:'<path d="M6 3v18M12 3v18M18 3v18" fill="none"/><circle cx="6" cy="15" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="18" cy="12" r="2"/>',
+  stu1:'<rect x="3" y="5" width="18" height="13" rx="2" fill="none"/><path d="M12 18v3M9 21h6" fill="none"/><text x="12" y="15" font-size="8" text-anchor="middle" font-weight="700">1</text>',
+  stu2:'<rect x="3" y="5" width="18" height="13" rx="2" fill="none"/><path d="M12 18v3M9 21h6" fill="none"/><text x="12" y="15" font-size="8" text-anchor="middle" font-weight="700">2</text>',
+  stu3:'<rect x="3" y="5" width="18" height="13" rx="2" fill="none"/><path d="M12 18v3M9 21h6" fill="none"/><text x="12" y="15" font-size="8" text-anchor="middle" font-weight="700">3</text>',
+  dub1:'<rect x="10" y="2" width="4" height="8" rx="2"/><path d="M7 9a5 5 0 0010 0" fill="none"/><path d="M12 14v4M9 21h6" fill="none"/><text x="20" y="7" font-size="7" text-anchor="middle" font-weight="700">1</text>',
+  dub2:'<rect x="10" y="2" width="4" height="8" rx="2"/><path d="M7 9a5 5 0 0010 0" fill="none"/><path d="M12 14v4M9 21h6" fill="none"/><text x="20" y="7" font-size="7" text-anchor="middle" font-weight="700">2</text>',
   embed:'<rect x="4" y="13" width="16" height="7" rx="1" fill="none"/><path d="M12 2v9M8 8l4 4 4-4" fill="none"/>',
   deembed:'<rect x="4" y="4" width="16" height="7" rx="1" fill="none"/><path d="M12 22v-9M8 16l4-4 4 4" fill="none"/>',
   da:'<rect x="9" y="9" width="6" height="6" rx="1"/><path d="M12 9V3M12 21v-6M9 12H3M21 12h-6M6 6l3 3M18 6l-3 3M6 18l3-3M18 18l-3-3" fill="none"/>',
   router:'<rect x="3" y="3" width="7" height="7" rx="1" fill="none"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none"/><path d="M10 6.5h4M6.5 10v4M17.5 10v4M10 17.5h4" fill="none"/>',
   mcr:'<rect x="2" y="4" width="20" height="13" rx="1" fill="none"/><path d="M2 8h20M8 4v13M15 4v13" fill="none"/><path d="M9 21h6" fill="none"/>',
-  programme:'<rect x="3" y="4" width="18" height="16" rx="2" fill="none"/><path d="M10 9l6 3-6 3z"/>',
-  dubbing:'<rect x="10" y="2" width="4" height="9" rx="2"/><path d="M6 10a6 6 0 0012 0M12 16v5M8 20h8" fill="none"/><path d="M3 13v3M20 13v3" fill="none"/>',
-  feed:'<path d="M3 12h13M11 6l6 6-6 6" fill="none"/><rect x="18" y="7" width="3" height="10" rx="1" fill="none"/>'
+  dubbing:'<rect x="10" y="2" width="4" height="9" rx="2"/><path d="M6 10a6 6 0 0012 0M12 16v5M8 20h8" fill="none"/><path d="M3 13v3M20 13v3" fill="none"/>'
 };
 const LABELS = {
-  studio:'STUDIO',camera:'CAMERA',crane:'เครน CAMERA',obvan:'OB VAN',location:'LOCATION',
-  event:'EVENT',news:'NEWS',live:'LIVE FEED',
+  obvan:'OB VAN', location:'LOCATION',
   ingest:'INGEST',social:'SOCIAL',facebook_thairath:'FACEBOOK THAIRATH',youtube_thairath:'YOUTUBE THAIRATH',tv:'TV',satellite:'SATELLITE',
-  scr:'SCR',mixer:'MIXER',embed:'EMBED',deembed:'DE-EMBED',
-  da:'DA',router:'ROUTER',mcr:'MCR',programme:'PROGRAMME',dubbing:'DUBBING',feed:'FEED'
-};
-const SUB = {
-  crane:'Crane Camera', obvan:'Outside Broadcast',
-  ingest:'File / signal ingest', social:'Social media feed',
-  facebook_thairath:'Facebook - Thairath', youtube_thairath:'YouTube - Thairath',
-  satellite:'Satellite downlink',
-  scr:'Studio Control Room', mixer:'Vision / Audio switch',
-  embed:'Audio → SDI embed', deembed:'SDI → discrete audio',
-  da:'Distribution Amplifier', router:'Signal routing matrix', mcr:'Master Control Room',
-  programme:'Playout schedule', dubbing:'Language / audio mix'
+  daft:'DAFT',rec:'REC',aveco:'AVECO',marina:'MARINA',prodrive:'PRODRIVE',
+  stu1:'STU1',stu2:'STU2',stu3:'STU3',dub1:'DUB1',dub2:'DUB2',
+  embed:'EMBED',deembed:'DE-EMBED',
+  da:'DA',router:'ROUTER',mcr:'MCR',dubbing:'DUBBING'
 };
 const CAT = {
-  studio:'src',camera:'src',crane:'src',obvan:'src',location:'src',event:'src',news:'src',live:'src',
+  obvan:'src',location:'src',
   ingest:'src',social:'src',facebook_thairath:'src',youtube_thairath:'src',tv:'src',satellite:'src',
-  router:'core',mcr:'core',deembed:'core',
-  feed:'out'
+  stu1:'core',stu2:'core',stu3:'core',dub1:'core',dub2:'core',
+  daft:'core',rec:'core',aveco:'core',marina:'core',prodrive:'core',
+  router:'core',mcr:'core',deembed:'core'
 };
-ICONS.nt = '<rect x="2" y="6" width="20" height="12" rx="2" fill="none"/><text x="12" y="15.5" font-size="8" text-anchor="middle" font-weight="700">NT</text>';
-LABELS.nt = 'NT'; CAT.nt = 'src';
 const FEED_IDS = Array.from({length:20}, (_,i)=>'feed'+(i+1));
 FEED_IDS.forEach((k,i)=>{
   ICONS[k] = ICONS.ingest;
   LABELS[k] = 'FEED '+(i+1);
   CAT[k] = 'src';
 });
+const DEVICE_IDS = ['lu800-1','lu600-1','lu600-2','lu300-1','lu300-2','lu300-3','lu300-4','lu300-5','solo-pro','solo-1','solo-2','solo-3','solo-4','solo-5','solo-6'];
+DEVICE_IDS.forEach(k=>{
+  ICONS[k] = k.startsWith('lu')
+    ? '<rect x="4" y="7" width="16" height="13" rx="2" fill="none"/><path d="M8 7V4M16 7V4" fill="none"/><path d="M8 17v-3M12 17v-5M16 17v-7" fill="none"/>'
+    : '<rect x="8" y="6" width="8" height="15" rx="2" fill="none"/><path d="M12 6V2" fill="none"/><circle cx="12" cy="2" r="1.4"/><path d="M10 16h4M10 19h4" fill="none"/>';
+  LABELS[k] = k.toUpperCase();
+  CAT[k] = 'src';
+});
 const GROUPS = [
-  ['แหล่งสัญญาณ',['studio','camera','crane','obvan','location','event','news','live','ingest','social','facebook_thairath','youtube_thairath','tv','satellite','nt',...FEED_IDS]],
-  ['ควบคุม/ประมวลผล',['scr','mixer','embed','deembed','da']],
-  ['เครือข่ายหลัก',['router','mcr']],
-  ['ผลผลิต',['programme','dubbing','feed']]
+  ['แหล่งสัญญาณ',['obvan','location',...FEED_IDS]],
+  ['ควบคุม/ประมวลผล',['stu1','stu2','stu3','dub1','dub2','embed','deembed','da']],
+  ['เครือข่ายหลัก',['tv','facebook_thairath','youtube_thairath','satellite','social','router','mcr']],
+  ['ผลผลิต',['dubbing']],
+  ['MAM / ITB',['ingest','daft','rec','aveco','marina','prodrive']],
+  ['DEVICE', DEVICE_IDS]
 ];
+const GROUP_STROKE = {'เครือข่ายหลัก':'net', 'ผลผลิต':'prod', 'MAM / ITB':'mam', 'DEVICE':'dev'};
+GROUPS.forEach(([title, types])=>{
+  const cat = GROUP_STROKE[title];
+  if(cat) types.forEach(t => CAT[t] = cat);
+});
 let nodes = [], edges = [], nextId = 1, connectMode = false, pendingFrom = null, selectedEdge = null, viewMode = false;
 const svgNodes = document.getElementById('nodes');
 const svgEdges = document.getElementById('edges');
@@ -155,10 +223,144 @@ const KEY = 'bcast_workflow_v1';
 function iconSvg(type){return `<svg viewBox="0 0 24 24" fill="currentColor">${ICONS[type]}</svg>`;}
 function esc(s){return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
+const VIDEO_DEFAULT = '1080i50';
+const CHANNELS = ['L1','R1','L2','R2','L3','R3','L4','R4'];
+const CH_OPTIONS = ['none','Full Mix','Thai Commentary Mix','English Commentary Mix','International Sound'];
+const CH_DEFAULT = {};
+CHANNELS.forEach(c => CH_DEFAULT[c] = (c === 'L1' || c === 'R1') ? 'Full Mix' : 'none');
+
+function chMap(f){
+  const c = f && f.ch;
+  if(c && !Array.isArray(c)) return Object.assign({}, CH_DEFAULT, c);
+  const m = Object.assign({}, CH_DEFAULT);
+  if(Array.isArray(c)) CHANNELS.forEach(k => { if(c.indexOf(k) >= 0) m[k] = 'Full Mix'; });
+  return m;
+}
+function chActive(f){
+  const m = chMap(f);
+  return CHANNELS.filter(c => m[c] && m[c] !== 'none');
+}
+function chText(f){
+  const m = chMap(f);
+  const act = CHANNELS.filter(c => m[c] && m[c] !== 'none');
+  return act.length ? act.map(c => c + ' → ' + m[c]).join(', ') : 'ไม่มีช่องเสียง';
+}
+
+function clip(s, max){ s = String(s); if(s.length <= max) return s; return s.slice(0, max-1).replace(/\s+$/,'') + '…'; }
+function fmtLine(n){
+  const f = n.fmt; if(!f) return '';
+  return `${f.video || VIDEO_DEFAULT} · ${chActive(f).length}ch`;
+}
+function fmtDetail(n){
+  const f = n.fmt; if(!f) return '';
+  return `Video: ${f.video || VIDEO_DEFAULT} | Audio: ${chText(f)}`;
+}
+
+let modalNode = null;
+const modal = document.getElementById('nodeModal');
+const fName = document.getElementById('fName');
+const fVideo = document.getElementById('fVideo');
+const fChips = document.getElementById('fChips');
+
+function openNodeDialog(n){
+  modalNode = n;
+  const f = n.fmt || {};
+  fName.value = n.label || LABELS[n.type] || '';
+  fVideo.value = f.video || VIDEO_DEFAULT;
+
+  const cm = chMap(f);
+  fChips.innerHTML = CHANNELS.map(c=>`
+    <label class="ch-row${cm[c] === 'none' ? ' off' : ''}">
+      <span>${c}</span>
+      <select data-ch="${c}">${CH_OPTIONS.map(o=>`<option value="${esc(o)}"${cm[c] === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>
+    </label>`).join('');
+  fChips.querySelectorAll('select').forEach(sel=>{
+    sel.onchange = ()=> sel.closest('.ch-row').classList.toggle('off', sel.value === 'none');
+  });
+
+  const ro = viewMode;
+  fName.disabled = ro; fVideo.disabled = ro;
+  fChips.querySelectorAll('select').forEach(s=> s.disabled = ro);
+  document.getElementById('mSave').style.display = ro ? 'none' : '';
+  document.getElementById('mCancel').textContent = ro ? 'ปิด' : 'ยกเลิก';
+
+  modal.classList.add('open');
+}
+function closeNodeDialog(){ modal.classList.remove('open'); modalNode = null; }
+function saveNodeDialog(){
+  if(!modalNode) return;
+  const name = fName.value.trim();
+  if(name) modalNode.label = name;
+  const ch = {};
+  fChips.querySelectorAll('select').forEach(sel => ch[sel.dataset.ch] = sel.value);
+  modalNode.fmt = {
+    video: fVideo.value.trim() || VIDEO_DEFAULT,
+    ch: ch
+  };
+  closeNodeDialog(); render(); save();
+}
+document.getElementById('mSave').onclick = saveNodeDialog;
+document.getElementById('mCancel').onclick = closeNodeDialog;
+modal.addEventListener('click', e=>{ if(e.target === modal) closeNodeDialog(); });
+window.addEventListener('keydown', e=>{
+  if(e.key !== 'Escape') return;
+  if(modal.classList.contains('open')) closeNodeDialog();
+  else if(infoNode) hideInfo();
+});
+
+const pop = document.getElementById('infoPop');
+const boardEl = document.getElementById('board');
+let infoNode = null;
+const CAT_COLOR = {src:'var(--violet)', core:'var(--teal)', out:'var(--amber)', net:'var(--yellow)', prod:'var(--pink)', mam:'var(--red)', dev:'var(--orange)'};
+const GROUP_COLOR = {
+  'แหล่งสัญญาณ':'var(--violet)', 'ควบคุม/ประมวลผล':'var(--teal)',
+  'เครือข่ายหลัก':'var(--yellow)', 'ผลผลิต':'var(--pink)',
+  'MAM / ITB':'var(--red)', 'DEVICE':'var(--orange)'
+};
+
+function placeInfo(n){
+  const br = boardEl.getBoundingClientRect();
+  const sx = br.width / 2200, sy = br.height / 1400;
+  const w = 270;
+  let left = (n.x + 85) * sx - w/2;
+  left = Math.max(8, Math.min(left, 2200*sx - w - 8));
+  pop.style.left = left + 'px';
+  pop.style.top = ((n.y + 60) * sy + 14) + 'px';
+}
+function showInfo(n){
+  const f = n.fmt;
+  const title = n.label || LABELS[n.type] || '';
+  let rows = `<dt>Video</dt><dd>${esc(f ? (f.video || VIDEO_DEFAULT) : '—')}</dd>`;
+  if(f){
+    const m = chMap(f);
+    const act = CHANNELS.filter(c => m[c] && m[c] !== 'none');
+    if(act.length){
+      rows += '<dt class="sect">Audio channels</dt>';
+      rows += act.map(c => `<dt>${c}</dt><dd>${esc(m[c])}</dd>`).join('');
+    } else {
+      rows += '<dt>Audio channels</dt><dd>ไม่มีช่องเสียง</dd>';
+    }
+  } else {
+    rows += '<dt>Audio channels</dt><dd>—</dd>';
+  }
+  pop.innerHTML = `
+    <h4><span class="dot" style="background:${CAT_COLOR[CAT[n.type]] || '#9AA0A8'}"></span>${esc(title)}</h4>
+    <dl>${rows}</dl>
+    <p class="close-hint">คลิกพื้นที่ว่างเพื่อปิด</p>`;
+  infoNode = n;
+  placeInfo(n);
+  pop.classList.add('open');
+}
+function hideInfo(){ pop.classList.remove('open'); infoNode = null; }
+boardEl.addEventListener('click', ()=>{ if(infoNode) hideInfo(); });
+
 function buildPalette(){
   const root = document.getElementById('palette');
   GROUPS.forEach(([title, types])=>{
-    const h = document.createElement('h2'); h.textContent = title; root.appendChild(h);
+    const h = document.createElement('h2');
+    h.textContent = title;
+    if(GROUP_COLOR[title]) h.style.color = GROUP_COLOR[title];
+    root.appendChild(h);
     types.forEach(t=>{
       const b = document.createElement('button');
       b.className='pitem'; b.innerHTML = iconSvg(t)+'<span>'+LABELS[t]+'</span>';
@@ -204,22 +406,28 @@ function render(){
     const cat = CAT[n.type] ? ' cat-'+CAT[n.type] : '';
     g.setAttribute('class','node'+cat+(pendingFrom===n.id?' selected':''));
     g.setAttribute('transform',`translate(${n.x},${n.y})`);
-    const sub = SUB[n.type];
+    const fmt = fmtLine(n);
+    const two = !!fmt;
     const title = n.label || LABELS[n.type];
     g.innerHTML = `
+      <title>${esc(title)}${n.fmt ? ' — ' + fmtDetail(n) : ''}</title>
       <rect width="170" height="60" rx="10"></rect>
-      <g class="ic" transform="translate(12,${sub?14:20})"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">${ICONS[n.type]}</svg></g>
-      <text class="title" x="40" y="${sub?27:35}">${esc(title)}</text>
-      ${sub ? `<text class="subtitle" x="40" y="43">${sub}</text>` : ''}
+      <g class="ic" transform="translate(12,${two?14:20})"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">${ICONS[n.type]}</svg></g>
+      <text class="title" x="40" y="${two?27:35}">${esc(title)}</text>
+      ${fmt ? `<text class="fmt" x="40" y="43">${esc(clip(fmt,26))}</text>` : ''}
       <g class="del" transform="translate(156,4)"><circle r="8"></circle><text x="-3" y="4">×</text></g>
     `;
     g.querySelector('.del').addEventListener('click', (ev)=>{ ev.stopPropagation(); removeNode(n.id); });
     g.addEventListener('pointerdown', (ev)=>onNodeDown(ev, n));
     g.addEventListener('dblclick', (ev)=>{
       ev.stopPropagation();
-      if(viewMode) return;
-      const next = window.prompt('แก้ไขชื่อโหนด:', title);
-      if(next !== null && next.trim() !== ''){ n.label = next.trim(); render(); save(); }
+      if(connectMode) return;
+      openNodeDialog(n);
+    });
+    g.addEventListener('click', (ev)=>{
+      if(!viewMode) return;
+      ev.stopPropagation();
+      showInfo(n);
     });
     svgNodes.appendChild(g);
   });
@@ -229,6 +437,7 @@ function removeNode(id){
   nodes = nodes.filter(n=>n.id!==id);
   edges = edges.filter(e=>e.from!==id && e.to!==id);
   if(pendingFrom===id) pendingFrom=null;
+  if(infoNode && infoNode.id===id) hideInfo();
   render(); save();
 }
 
@@ -259,11 +468,12 @@ function onNodeDown(ev, n){
 
 function setViewMode(on){
   viewMode = on; connectMode = false; pendingFrom = null; selectedEdge = null;
+  hideInfo();
   document.body.classList.toggle('view-mode', viewMode);
   const btn = document.getElementById('viewToggle');
   btn.classList.toggle('active', viewMode);
   btn.textContent = viewMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
-  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อแก้ไขชื่อ';
+  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท';
   render();
 }
 document.getElementById('viewToggle').onclick = ()=> setViewMode(!viewMode);
@@ -287,19 +497,25 @@ function save(){
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw){ const d = JSON.parse(raw); nodes=d.nodes||[]; edges=d.edges||[]; nextId=d.nextId||1; }
+    if(raw){
+      const d = JSON.parse(raw);
+      nodes = (d.nodes||[]).filter(n=>n && n.type && LABELS[n.type]);
+      const ids = new Set(nodes.map(n=>n.id));
+      edges = (d.edges||[]).filter(e=>ids.has(e.from) && ids.has(e.to));
+      nextId = d.nextId || (nodes.length + 1);
+    }
     else { seedDefault(); }
   }catch(e){ seedDefault(); }
 }
 function seedDefault(){
-  addNode('camera',60,60); addNode('obvan',60,220); addNode('scr',260,140);
-  addNode('mixer',440,140); addNode('router',640,100); addNode('mcr',640,220);
-  addNode('programme',840,140); addNode('feed',1020,140);
+  addNode('obvan',60,60); addNode('location',60,220);
+  addNode('embed',260,140); addNode('da',460,140);
+  addNode('router',660,100); addNode('mcr',660,220);
+  addNode('dubbing',880,140);
   edges = [
     {from:nodes[0].id,to:nodes[2].id},{from:nodes[1].id,to:nodes[2].id},
     {from:nodes[2].id,to:nodes[3].id},{from:nodes[3].id,to:nodes[4].id},
-    {from:nodes[4].id,to:nodes[5].id},{from:nodes[5].id,to:nodes[6].id},
-    {from:nodes[6].id,to:nodes[7].id}
+    {from:nodes[4].id,to:nodes[5].id},{from:nodes[5].id,to:nodes[6].id}
   ];
 }
 
