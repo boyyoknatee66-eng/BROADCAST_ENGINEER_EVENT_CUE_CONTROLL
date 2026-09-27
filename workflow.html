@@ -91,6 +91,7 @@
   body.view-mode #connectBtn,
   body.view-mode #delEdgeBtn,
   body.view-mode #clearBtn,
+  body.view-mode #importBtn,
   body.view-mode .del{display:none;}
   body.view-mode .node{cursor:default;}
   #viewToggle.active{border-color:var(--amber);color:var(--amber);}
@@ -121,6 +122,9 @@
   <button class="tb" id="connectBtn">🔗 เชื่อมเส้น</button>
   <button class="tb" id="delEdgeBtn">✂️ ลบเส้นที่เลือก</button>
   <button class="tb" id="clearBtn">🗑️ ล้างทั้งหมด</button>
+  <button class="tb" id="importBtn">📂 Import</button>
+  <button class="tb" id="exportBtn">💾 Export</button>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
   <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท</span>
 </div>
 
@@ -489,6 +493,66 @@ document.getElementById('delEdgeBtn').onclick = ()=>{
 };
 document.getElementById('clearBtn').onclick = ()=>{
   if(confirm('ล้างทั้งหมดจริงหรือไม่?')){ nodes=[]; edges=[]; pendingFrom=null; selectedEdge=null; render(); save(); }
+};
+
+function sanitizeNodes(list){
+  const valid = list.filter(n=>n && typeof n==='object' && n.type && LABELS[n.type]);
+  let max = 0;
+  valid.forEach(n=>{ const m = /^n(\d+)$/.exec(String(n.id||'')); if(m) max = Math.max(max, +m[1]); });
+  const seen = new Set();
+  const out = valid.map(n=>{
+    let id = (typeof n.id==='string' && n.id) ? n.id : 'n'+(++max);
+    if(seen.has(id)) id = 'n'+(++max);
+    seen.add(id);
+    const node = {id, type:n.type, x:isFinite(+n.x)?+n.x:120, y:isFinite(+n.y)?+n.y:100};
+    if(typeof n.label==='string' && n.label) node.label = n.label;
+    if(n.fmt && typeof n.fmt==='object') node.fmt = n.fmt;
+    return node;
+  });
+  return {nodes:out, nextId:max+1};
+}
+function importJson(text){
+  let d;
+  try{ d = JSON.parse(text); }catch(e){ alert('ไฟล์นี้ไม่ใช่ JSON ที่ถูกต้อง'); return false; }
+  if(!d || !Array.isArray(d.nodes)){ alert('ไฟล์นี้ไม่ใช่ไฟล์ Workflow ที่ถูกต้อง'); return false; }
+  const s = sanitizeNodes(d.nodes);
+  if(!s.nodes.length && !confirm('ไม่พบโหนดที่รู้จักในไฟล์นี้ ต้องการเปิดผังว่างหรือไม่?')) return false;
+  const ids = new Set(s.nodes.map(n=>n.id));
+  nodes = s.nodes;
+  edges = (Array.isArray(d.edges) ? d.edges : [])
+    .filter(e=>e && ids.has(e.from) && ids.has(e.to))
+    .map(e=>({from:e.from, to:e.to}));
+  nextId = s.nextId;
+  pendingFrom = null; selectedEdge = null; hideInfo();
+  render(); save();
+  document.getElementById('hint').textContent = 'โหลดไฟล์แล้ว — ' + nodes.length + ' โหนด, ' + edges.length + ' เส้น';
+  return true;
+}
+function buildExportJson(){
+  return JSON.stringify({app:'broadcast-workflow', version:1, exportedAt:new Date().toISOString(), nodes, edges}, null, 2);
+}
+function exportJson(){
+  const blob = new Blob([buildExportJson()], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const ts = new Date(), p = n=>String(n).padStart(2,'0');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'broadcast-workflow-' + ts.getFullYear() + p(ts.getMonth()+1) + p(ts.getDate()) +
+               '-' + p(ts.getHours()) + p(ts.getMinutes()) + p(ts.getSeconds()) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  document.getElementById('hint').textContent = 'ส่งออกไฟล์แล้ว — ' + nodes.length + ' โหนด, ' + edges.length + ' เส้น';
+}
+document.getElementById('exportBtn').onclick = exportJson;
+document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = function(){
+  const file = this.files && this.files[0];
+  this.value = '';
+  if(!file) return;
+  const rd = new FileReader();
+  rd.onload = ()=> importJson(rd.result);
+  rd.onerror = ()=> alert('อ่านไฟล์ไม่สำเร็จ');
+  rd.readAsText(file);
 };
 
 function save(){
