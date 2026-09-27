@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Broadcast Workflow Builder</title>
+<style>
+  :root{
+    --bg:#0D0F12; --panel:#171A1F; --panel2:#1E2229; --line:#3A3F47;
+    --amber:#F2A93B; --teal:#4FD1C5; --violet:#B694F7; --text:#E9E7E2; --sub:#9AA0A8;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai','Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;}
+  header{padding:14px 18px 10px;border-bottom:1px solid var(--line);}
+  h1{font-size:1.15rem;margin:0 0 4px;}
+  h1 span{color:var(--amber);}
+  p{margin:0;color:var(--sub);font-size:.82rem;}
+  .layout{display:flex;flex:1;min-height:0;}
+  .palette{width:210px;flex:0 0 210px;border-right:1px solid var(--line);overflow-y:auto;padding:10px;}
+  .palette h2{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:14px 4px 6px;}
+  .palette h2:first-child{margin-top:2px;}
+  .pitem{display:flex;align-items:center;gap:8px;width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 9px;margin-bottom:6px;cursor:pointer;font-size:.82rem;text-align:left;}
+  .pitem:hover{border-color:var(--amber);}
+  .pitem svg{width:18px;height:18px;flex:none;color:var(--teal);}
+  .canvas-wrap{flex:1;position:relative;overflow:auto;background:
+    linear-gradient(var(--panel) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg,var(--panel) 1px,transparent 1px) 0 0/28px 28px, var(--bg);}
+  svg#board{width:2200px;height:1400px;display:block;}
+  .toolbar{display:flex;gap:8px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);flex-wrap:wrap;}
+  button.tb{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;}
+  button.tb.active{border-color:var(--amber);color:var(--amber);}
+  button.tb:hover{border-color:var(--teal);}
+  .hint{color:var(--sub);font-size:.78rem;margin-left:auto;}
+  .node rect{fill:var(--panel2);stroke:var(--line);stroke-width:1.3;}
+  .node.cat-src rect{stroke:var(--violet);}
+  .node.cat-core rect{stroke:var(--teal);}
+  .node.cat-out rect{stroke:var(--amber);}
+  .node.selected rect{stroke:var(--amber);stroke-width:2.4;}
+  .node .title{fill:var(--text);font-size:13px;font-weight:700;font-family:inherit;}
+  .node .subtitle{fill:var(--sub);font-size:10.5px;font-family:inherit;}
+  .node .ic{color:var(--teal);}
+  .node .del{cursor:pointer;}
+  .node .del circle{fill:#2A2020;stroke:var(--line);}
+  .node .del text{fill:#E77;font-size:11px;font-family:inherit;}
+  .edge{stroke:#5A6270;stroke-width:1.6;fill:none;marker-end:url(#arrow);cursor:pointer;}
+  .edge.pending{stroke:var(--teal);stroke-dasharray:4 3;}
+  body.view-mode .palette,
+  body.view-mode #connectBtn,
+  body.view-mode #delEdgeBtn,
+  body.view-mode #clearBtn,
+  body.view-mode .del{display:none;}
+  body.view-mode .node{cursor:default;}
+  #viewToggle.active{border-color:var(--amber);color:var(--amber);}
+</style>
+</head>
+<body>
+<header>
+  <h1>Broadcast Workflow <span>Builder</span></h1>
+  <p>เลือกไอคอนจากด้านซ้ายเพื่อวางบนกระดาน ลากย้ายตำแหน่งได้ กด "เชื่อมเส้น" แล้วคลิกโหนด 2 อัน เพื่อวาดลูกศรเส้นสัญญาณ</p>
+</header>
+<div class="layout">
+  <div class="palette" id="palette"></div>
+  <div class="canvas-wrap">
+    <svg id="board" viewBox="0 0 2200 1400">
+      <defs>
+        <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#5A6270"/>
+        </marker>
+      </defs>
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+</div>
+<div class="toolbar">
+  <button class="tb" id="viewToggle">👁️ โหมดดูอย่างเดียว</button>
+  <button class="tb" id="connectBtn">🔗 เชื่อมเส้น</button>
+  <button class="tb" id="delEdgeBtn">✂️ ลบเส้นที่เลือก</button>
+  <button class="tb" id="clearBtn">🗑️ ล้างทั้งหมด</button>
+  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อแก้ไขชื่อ</span>
+</div>
+
+<script>
+const ICONS = {
+  studio:'<circle cx="12" cy="9" r="3"/><path d="M4 20l3-9h10l3 9" fill="none"/>',
+  camera:'<rect x="3" y="7" width="14" height="10" rx="2"/><path d="M17 10l4-2v8l-4-2z"/><circle cx="10" cy="12" r="2.4" fill="none"/>',
+  crane:'<circle cx="18" cy="6" r="2.4"/><path d="M18 8v3l-11 6" fill="none"/><rect x="2" y="16" width="7" height="5" rx="1"/>',
+  obvan:'<rect x="2" y="10" width="14" height="7" rx="1"/><path d="M16 12h4l2 3v2h-6z"/><circle cx="6.5" cy="18.5" r="1.6"/><circle cx="17" cy="18.5" r="1.6"/>',
+  location:'<path d="M12 21s7-7.2 7-12a7 7 0 10-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4" fill="var(--bg)"/>',
+  event:'<path d="M3 9l9-6 9 6" fill="none"/><rect x="5" y="9" width="14" height="10" rx="1"/>',
+  news:'<rect x="9" y="2" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4M9 21h6" fill="none"/>',
+  live:'<circle cx="12" cy="12" r="2.6"/><path d="M7 8a7 7 0 000 8M17 8a7 7 0 010 8M4 5a11 11 0 000 14M20 5a11 11 0 010 14" fill="none"/>',
+  ingest:'<rect x="4" y="10" width="16" height="9" rx="2" fill="none"/><path d="M12 2v10M8 9l4 4 4-4" fill="none"/>',
+  social:'<circle cx="6" cy="12" r="2.3"/><circle cx="17" cy="6" r="2.3"/><circle cx="17" cy="18" r="2.3"/><path d="M8.1 10.7L14.9 7.1M8.1 13.3l6.8 3.6" fill="none"/>',
+  facebook_thairath:'<rect x="4" y="3" width="16" height="18" rx="2" fill="none"/><path d="M8 8h8M8 12h8M8 16h5" fill="none"/>',
+  youtube_thairath:'<rect x="3" y="6" width="18" height="12" rx="3" fill="none"/><path d="M10 9.5l6 2.5-6 2.5z"/>',
+  tv:'<rect x="3" y="6" width="18" height="12" rx="2" fill="none"/><path d="M8 3l4 3 4-3M7 21h10" fill="none"/>',
+  satellite:'<path d="M3 13a10 10 0 0110-10" fill="none"/><path d="M3 13l7 7" fill="none"/><circle cx="17" cy="17" r="2"/><path d="M17 17L21 21" fill="none"/>',
+  scr:'<rect x="3" y="4" width="18" height="16" rx="2" fill="none"/><path d="M7 8v4M12 6v6M17 9v3" fill="none"/><circle cx="7" cy="14" r="1.3"/><circle cx="12" cy="16" r="1.3"/><circle cx="17" cy="13" r="1.3"/>',
+  mixer:'<path d="M6 3v18M12 3v18M18 3v18" fill="none"/><circle cx="6" cy="15" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="18" cy="12" r="2"/>',
+  embed:'<rect x="4" y="13" width="16" height="7" rx="1" fill="none"/><path d="M12 2v9M8 8l4 4 4-4" fill="none"/>',
+  deembed:'<rect x="4" y="4" width="16" height="7" rx="1" fill="none"/><path d="M12 22v-9M8 16l4-4 4 4" fill="none"/>',
+  da:'<rect x="9" y="9" width="6" height="6" rx="1"/><path d="M12 9V3M12 21v-6M9 12H3M21 12h-6M6 6l3 3M18 6l-3 3M6 18l3-3M18 18l-3-3" fill="none"/>',
+  router:'<rect x="3" y="3" width="7" height="7" rx="1" fill="none"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none"/><path d="M10 6.5h4M6.5 10v4M17.5 10v4M10 17.5h4" fill="none"/>',
+  mcr:'<rect x="2" y="4" width="20" height="13" rx="1" fill="none"/><path d="M2 8h20M8 4v13M15 4v13" fill="none"/><path d="M9 21h6" fill="none"/>',
+  programme:'<rect x="3" y="4" width="18" height="16" rx="2" fill="none"/><path d="M10 9l6 3-6 3z"/>',
+  dubbing:'<rect x="10" y="2" width="4" height="9" rx="2"/><path d="M6 10a6 6 0 0012 0M12 16v5M8 20h8" fill="none"/><path d="M3 13v3M20 13v3" fill="none"/>',
+  feed:'<path d="M3 12h13M11 6l6 6-6 6" fill="none"/><rect x="18" y="7" width="3" height="10" rx="1" fill="none"/>'
+};
+const LABELS = {
+  studio:'STUDIO',camera:'CAMERA',crane:'เครน CAMERA',obvan:'OB VAN',location:'LOCATION',
+  event:'EVENT',news:'NEWS',live:'LIVE FEED',
+  ingest:'INGEST',social:'SOCIAL',facebook_thairath:'FACEBOOK THAIRATH',youtube_thairath:'YOUTUBE THAIRATH',tv:'TV',satellite:'SATELLITE',
+  scr:'SCR',mixer:'MIXER',embed:'EMBED',deembed:'DE-EMBED',
+  da:'DA',router:'ROUTER',mcr:'MCR',programme:'PROGRAMME',dubbing:'DUBBING',feed:'FEED'
+};
+const SUB = {
+  crane:'Crane Camera', obvan:'Outside Broadcast',
+  ingest:'File / signal ingest', social:'Social media feed',
+  facebook_thairath:'Facebook - Thairath', youtube_thairath:'YouTube - Thairath',
+  satellite:'Satellite downlink',
+  scr:'Studio Control Room', mixer:'Vision / Audio switch',
+  embed:'Audio → SDI embed', deembed:'SDI → discrete audio',
+  da:'Distribution Amplifier', router:'Signal routing matrix', mcr:'Master Control Room',
+  programme:'Playout schedule', dubbing:'Language / audio mix'
+};
+const CAT = {
+  studio:'src',camera:'src',crane:'src',obvan:'src',location:'src',event:'src',news:'src',live:'src',
+  ingest:'src',social:'src',facebook_thairath:'src',youtube_thairath:'src',tv:'src',satellite:'src',
+  router:'core',mcr:'core',deembed:'core',
+  feed:'out'
+};
+ICONS.nt = '<rect x="2" y="6" width="20" height="12" rx="2" fill="none"/><text x="12" y="15.5" font-size="8" text-anchor="middle" font-weight="700">NT</text>';
+LABELS.nt = 'NT'; CAT.nt = 'src';
+const FEED_IDS = Array.from({length:20}, (_,i)=>'feed'+(i+1));
+FEED_IDS.forEach((k,i)=>{
+  ICONS[k] = ICONS.ingest;
+  LABELS[k] = 'FEED '+(i+1);
+  CAT[k] = 'src';
+});
+const GROUPS = [
+  ['แหล่งสัญญาณ',['studio','camera','crane','obvan','location','event','news','live','ingest','social','facebook_thairath','youtube_thairath','tv','satellite','nt',...FEED_IDS]],
+  ['ควบคุม/ประมวลผล',['scr','mixer','embed','deembed','da']],
+  ['เครือข่ายหลัก',['router','mcr']],
+  ['ผลผลิต',['programme','dubbing','feed']]
+];
+let nodes = [], edges = [], nextId = 1, connectMode = false, pendingFrom = null, selectedEdge = null, viewMode = false;
+const svgNodes = document.getElementById('nodes');
+const svgEdges = document.getElementById('edges');
+const KEY = 'bcast_workflow_v1';
+
+function iconSvg(type){return `<svg viewBox="0 0 24 24" fill="currentColor">${ICONS[type]}</svg>`;}
+function esc(s){return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function buildPalette(){
+  const root = document.getElementById('palette');
+  GROUPS.forEach(([title, types])=>{
+    const h = document.createElement('h2'); h.textContent = title; root.appendChild(h);
+    types.forEach(t=>{
+      const b = document.createElement('button');
+      b.className='pitem'; b.innerHTML = iconSvg(t)+'<span>'+LABELS[t]+'</span>';
+      b.onclick = ()=>addNode(t);
+      root.appendChild(b);
+    });
+  });
+}
+
+function addNode(type, x, y){
+  const id = 'n'+(nextId++);
+  const cx = x ?? (120 + (nodes.length%7)*190);
+  const cy = y ?? (100 + Math.floor(nodes.length/7)*150);
+  nodes.push({id, type, x:cx, y:cy});
+  render(); save();
+}
+
+function edgePath(a,b){
+  const w=170, h=60;
+  let sx, sy, ex, ey;
+  if(a.x + w <= b.x){ sx=a.x+w; sy=a.y+h/2; ex=b.x; ey=b.y+h/2; }
+  else if(b.x + w <= a.x){ sx=a.x; sy=a.y+h/2; ex=b.x+w; ey=b.y+h/2; }
+  else if(a.y <= b.y){ sx=a.x+w/2; sy=a.y+h; ex=b.x+w/2; ey=b.y; }
+  else { sx=a.x+w/2; sy=a.y; ex=b.x+w/2; ey=b.y+h; }
+  const dx = Math.max(Math.abs(ex-sx)*0.5, 40);
+  const c1x = sx + (ex>=sx? dx : -dx), c1y = sy;
+  const c2x = ex - (ex>=sx? dx : -dx), c2y = ey;
+  return `M${sx},${sy} C${c1x},${c1y} ${c2x},${c2y} ${ex},${ey}`;
+}
+function render(){
+  svgNodes.innerHTML=''; svgEdges.innerHTML='';
+  edges.forEach(e=>{
+    const a = nodes.find(n=>n.id===e.from), b = nodes.find(n=>n.id===e.to);
+    if(!a||!b) return;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','edge'+(selectedEdge===e?' pending':''));
+    path.setAttribute('d', edgePath(a,b));
+    path.onclick = (ev)=>{ if(viewMode) return; ev.stopPropagation(); selectedEdge = (selectedEdge===e)?null:e; render(); };
+    svgEdges.appendChild(path);
+  });
+  nodes.forEach(n=>{
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const cat = CAT[n.type] ? ' cat-'+CAT[n.type] : '';
+    g.setAttribute('class','node'+cat+(pendingFrom===n.id?' selected':''));
+    g.setAttribute('transform',`translate(${n.x},${n.y})`);
+    const sub = SUB[n.type];
+    const title = n.label || LABELS[n.type];
+    g.innerHTML = `
+      <rect width="170" height="60" rx="10"></rect>
+      <g class="ic" transform="translate(12,${sub?14:20})"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">${ICONS[n.type]}</svg></g>
+      <text class="title" x="40" y="${sub?27:35}">${esc(title)}</text>
+      ${sub ? `<text class="subtitle" x="40" y="43">${sub}</text>` : ''}
+      <g class="del" transform="translate(156,4)"><circle r="8"></circle><text x="-3" y="4">×</text></g>
+    `;
+    g.querySelector('.del').addEventListener('click', (ev)=>{ ev.stopPropagation(); removeNode(n.id); });
+    g.addEventListener('pointerdown', (ev)=>onNodeDown(ev, n));
+    g.addEventListener('dblclick', (ev)=>{
+      ev.stopPropagation();
+      if(viewMode) return;
+      const next = window.prompt('แก้ไขชื่อโหนด:', title);
+      if(next !== null && next.trim() !== ''){ n.label = next.trim(); render(); save(); }
+    });
+    svgNodes.appendChild(g);
+  });
+}
+
+function removeNode(id){
+  nodes = nodes.filter(n=>n.id!==id);
+  edges = edges.filter(e=>e.from!==id && e.to!==id);
+  if(pendingFrom===id) pendingFrom=null;
+  render(); save();
+}
+
+function onNodeDown(ev, n){
+  if(viewMode) return;
+  if(connectMode){
+    if(!pendingFrom){ pendingFrom = n.id; render(); }
+    else if(pendingFrom !== n.id){
+      edges.push({from:pendingFrom, to:n.id});
+      pendingFrom = null; render(); save();
+    }
+    return;
+  }
+  const board = document.getElementById('board');
+  const start = board.createSVGPoint();
+  const move = (mv)=>{
+    const rect = board.getBoundingClientRect();
+    const vb = board.viewBox.baseVal;
+    const x = (mv.clientX-rect.left)*(vb.width/rect.width) - 85;
+    const y = (mv.clientY-rect.top)*(vb.height/rect.height) - 30;
+    n.x = Math.max(0,x); n.y = Math.max(0,y);
+    render();
+  };
+  const up = ()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); save(); };
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+}
+
+function setViewMode(on){
+  viewMode = on; connectMode = false; pendingFrom = null; selectedEdge = null;
+  document.body.classList.toggle('view-mode', viewMode);
+  const btn = document.getElementById('viewToggle');
+  btn.classList.toggle('active', viewMode);
+  btn.textContent = viewMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
+  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อแก้ไขชื่อ';
+  render();
+}
+document.getElementById('viewToggle').onclick = ()=> setViewMode(!viewMode);
+
+document.getElementById('connectBtn').onclick = (e)=>{
+  connectMode = !connectMode; pendingFrom=null;
+  e.target.classList.toggle('active', connectMode);
+  document.getElementById('hint').textContent = connectMode ? 'คลิกโหนดต้นทาง แล้วคลิกโหนดปลายทาง เพื่อวาดเส้น' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด';
+  render();
+};
+document.getElementById('delEdgeBtn').onclick = ()=>{
+  if(selectedEdge){ edges = edges.filter(e=>e!==selectedEdge); selectedEdge=null; render(); save(); }
+};
+document.getElementById('clearBtn').onclick = ()=>{
+  if(confirm('ล้างทั้งหมดจริงหรือไม่?')){ nodes=[]; edges=[]; pendingFrom=null; selectedEdge=null; render(); save(); }
+};
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({nodes, edges, nextId})); }catch(e){}
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const d = JSON.parse(raw); nodes=d.nodes||[]; edges=d.edges||[]; nextId=d.nextId||1; }
+    else { seedDefault(); }
+  }catch(e){ seedDefault(); }
+}
+function seedDefault(){
+  addNode('camera',60,60); addNode('obvan',60,220); addNode('scr',260,140);
+  addNode('mixer',440,140); addNode('router',640,100); addNode('mcr',640,220);
+  addNode('programme',840,140); addNode('feed',1020,140);
+  edges = [
+    {from:nodes[0].id,to:nodes[2].id},{from:nodes[1].id,to:nodes[2].id},
+    {from:nodes[2].id,to:nodes[3].id},{from:nodes[3].id,to:nodes[4].id},
+    {from:nodes[4].id,to:nodes[5].id},{from:nodes[5].id,to:nodes[6].id},
+    {from:nodes[6].id,to:nodes[7].id}
+  ];
+}
+
+buildPalette();
+load();
+if(new URLSearchParams(location.search).get('view')==='1'){ setViewMode(true); }
+render();
+</script>
+</body>
+</html>
