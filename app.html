@@ -308,11 +308,11 @@
             </span>
             <div id="time-presets-container" class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 space-x-1">
                 <button data-span="1800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">30 min</button>
-                <button data-span="3600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent preset-btn-active">1 hr</button>
+                <button data-span="3600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">1 hr</button>
                 <button data-span="10800" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">3 hr</button>
                 <button data-span="21600" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">6 hr</button>
                 <button data-span="43200" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">12 hr</button>
-                <button data-span="86400" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent">24 hr</button>
+                <button data-span="86400" class="time-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition border border-transparent preset-btn-active">24 hr</button>
             </div>
         </div>
     </footer>
@@ -507,7 +507,7 @@
         // Global Application State
         const state = {
             currentSystemSeconds: 0,
-            activeSpanSeconds: 3600, // Default 1 Hour View Window
+            activeSpanSeconds: 86400, // Default 24 Hour View Window
             pxPerSecond: 1, // Computed based on container width / activeSpanSeconds
             audioEnabled: true,
             activeCuesTriggered: new Set(),

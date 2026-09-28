@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viewer</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --drag: rgba(0, 120, 255, .35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111111;
+      --drag: rgba(90, 160, 255, .45);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  #wrap {
+    --r: 50; /* ความสูงแผงบน (%) */
+    display: grid;
+    grid-template-rows: calc((100% - 8px) * var(--r) / 100) 8px 1fr;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    background: var(--bg);
+  }
+  /* seam มองไม่เห็นตลอดเวลา ยกเว้นตอนลาก */
+  #divider {
+    height: 8px;
+    background: transparent;
+    cursor: row-resize;
+    touch-action: none;
+    outline: none;
+    user-select: none;
+  }
+  #wrap.dragging #divider { background: var(--drag); }
+  #wrap.dragging iframe { pointer-events: none; }
+  #wrap.dragging { cursor: row-resize; user-select: none; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <iframe id="top" src="app.html" allow="clipboard-write"></iframe>
+  <div id="divider" role="separator" aria-orientation="horizontal"
+       aria-valuemin="15" aria-valuemax="85" aria-valuenow="50" tabindex="0"></div>
+  <iframe id="bottom" src="workflow.html" allow="clipboard-write"></iframe>
+</div>
+
+<script>
+(function () {
+
+  var MIN = 15, MAX = 85;
+  var wrap = document.getElementById('wrap');
+  var divider = document.getElementById('divider');
+  var ratio = 50;
+
+  function clamp(v) { return Math.min(MAX, Math.max(MIN, v)); }
+  function setRatio(v) {
+    ratio = clamp(v);
+    wrap.style.setProperty('--r', ratio);
+    divider.setAttribute('aria-valuenow', Math.round(ratio));
+  }
+
+  function move(e) {
+    var rect = wrap.getBoundingClientRect();
+    setRatio(((e.clientY - rect.top) / rect.height) * 100);
+  }
+  function stop(e) {
+    wrap.classList.remove('dragging');
+    try { divider.releasePointerCapture(e.pointerId); } catch (_) {}
+    divider.removeEventListener('pointermove', move);
+    divider.removeEventListener('pointerup', stop);
+    divider.removeEventListener('pointercancel', stop);
+  }
+
+  divider.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    wrap.classList.add('dragging');
+    divider.setPointerCapture(e.pointerId);
+    divider.addEventListener('pointermove', move);
+    divider.addEventListener('pointerup', stop);
+    divider.addEventListener('pointercancel', stop);
+  });
+
+
+  divider.addEventListener('dblclick', function () { setRatio(50); });
+
+  divider.addEventListener('keydown', function (e) {
+    var step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+      case 'ArrowUp':   setRatio(ratio - step); break;
+      case 'ArrowDown': setRatio(ratio + step); break;
+      case 'Home':      setRatio(MIN); break;
+      case 'End':       setRatio(MAX); break;
+      case 'Enter':     setRatio(50); break;
+      default: return;
+    }
+    e.preventDefault();
+  });
+
+  setRatio(50);
+})();
+</script>
+</body>
+</html>
