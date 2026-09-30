@@ -15,8 +15,8 @@
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
   body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai','Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;}
-  header{padding:14px 18px 10px;border-bottom:1px solid var(--line);}
-  h1{font-size:1.15rem;margin:0 0 4px;}
+  header{padding:7px 18px 6px;border-bottom:1px solid var(--line);width:fit-content;max-width:100%;}
+  h1{font-size:1.15rem;margin:0 0 2px;}
   h1 span{color:var(--amber);}
   p{margin:0;color:var(--sub);font-size:.82rem;}
   .layout{display:flex;flex:1;min-height:0;}
@@ -442,7 +442,7 @@ function placeInfo(n){
   const br = boardEl.getBoundingClientRect();
   const sx = br.width / 2200, sy = br.height / 1400;
   const w = 270;
-  let left = (n.x + 85) * sx - w/2;
+  let left = (n.x + nodeWidth(n)/2) * sx - w/2;
   left = Math.max(8, Math.min(left, 2200*sx - w - 8));
   pop.style.left = left + 'px';
   pop.style.top = ((n.y + 60) * sy + 14) + 'px';
@@ -503,13 +503,31 @@ function addNode(type, x, y){
   render(); save();
 }
 
+const NODE_W = 170, NODE_H = 60, NODE_FIT_PAD = 10;
+const NODE_FONT = "700 13px 'IBM Plex Sans Thai','Segoe UI',system-ui,sans-serif";
+const FMT_FONT = "10px 'IBM Plex Sans Thai','Segoe UI',system-ui,sans-serif";
+let _mctx = null;
+function measureText(str, font){
+  if(str === '' || str == null) return 0;
+  if(!_mctx) _mctx = document.createElement('canvas').getContext('2d');
+  _mctx.font = font;
+  return _mctx.measureText(String(str)).width;
+}
+function nodeWidth(n){
+  const fmt = n.fmt || {};
+  const title = n.label || LABELS[n.type] || '';
+  let w = 40 + measureText(title, NODE_FONT) + NODE_FIT_PAD;
+  if(fmt.showVideo) w = Math.max(w, 40 + measureText(clip(fmt.video || VIDEO_DEFAULT, 26), FMT_FONT) + NODE_FIT_PAD);
+  if(fmt.showAudio) w = Math.max(w, 40 + measureText(clip(chActive(fmt).length + 'ch', 26), FMT_FONT) + NODE_FIT_PAD);
+  return Math.max(NODE_W, Math.ceil(w + 2));
+}
 function edgePath(a,b){
-  const w=170, h=60;
+  const wa = nodeWidth(a), wb = nodeWidth(b), h = NODE_H;
   let sx, sy, ex, ey;
-  if(a.x + w <= b.x){ sx=a.x+w; sy=a.y+h/2; ex=b.x; ey=b.y+h/2; }
-  else if(b.x + w <= a.x){ sx=a.x; sy=a.y+h/2; ex=b.x+w; ey=b.y+h/2; }
-  else if(a.y <= b.y){ sx=a.x+w/2; sy=a.y+h; ex=b.x+w/2; ey=b.y; }
-  else { sx=a.x+w/2; sy=a.y; ex=b.x+w/2; ey=b.y+h; }
+  if(a.x + wa <= b.x){ sx=a.x+wa; sy=a.y+h/2; ex=b.x; ey=b.y+h/2; }
+  else if(b.x + wb <= a.x){ sx=a.x; sy=a.y+h/2; ex=b.x+wb; ey=b.y+h/2; }
+  else if(a.y <= b.y){ sx=a.x+wa/2; sy=a.y+h; ex=b.x+wb/2; ey=b.y; }
+  else { sx=a.x+wa/2; sy=a.y; ex=b.x+wb/2; ey=b.y+h; }
   const dx = Math.max(Math.abs(ex-sx)*0.5, 40);
   const c1x = sx + (ex>=sx? dx : -dx), c1y = sy;
   const c2x = ex - (ex>=sx? dx : -dx), c2y = ey;
@@ -550,7 +568,7 @@ function render(){
 
     g.innerHTML = `
       <title>${esc(title)}${n.fmt ? ' — ' + fmtDetail(n) : ''}</title>
-      <rect width="170" height="60" rx="10" ${n.color ? `style="stroke:${n.color}"` : ''}></rect>
+      <rect width="${nodeWidth(n)}" height="${NODE_H}" rx="10" ${n.color ? `style="stroke:${n.color}"` : ''}></rect>
       <g class="ic" transform="translate(12,${(showV||showA)?14:20})"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">${ICONS[n.type]}</svg></g>
       <text class="title" x="40" y="${(showV||showA)?27:35}">${esc(title)}</text>
       ${vText}
@@ -598,8 +616,8 @@ function onNodeDown(ev, n){
   const move = (mv)=>{
     const rect = board.getBoundingClientRect();
     const vb = board.viewBox.baseVal;
-    const x = (mv.clientX-rect.left)*(vb.width/rect.width) - 85;
-    const y = (mv.clientY-rect.top)*(vb.height/rect.height) - 30;
+    const x = (mv.clientX-rect.left)*(vb.width/rect.width) - nodeWidth(n)/2;
+    const y = (mv.clientY-rect.top)*(vb.height/rect.height) - NODE_H/2;
     n.x = Math.max(0,x); n.y = Math.max(0,y);
     render();
   };
