@@ -29,6 +29,7 @@
   .canvas-wrap{flex:1;position:relative;overflow:auto;background:
     linear-gradient(var(--panel) 1px,transparent 1px) 0 0/28px 28px,
     linear-gradient(90deg,var(--panel) 1px,transparent 1px) 0 0/28px 28px, var(--bg);}
+  .canvas-wrap.panning{cursor:grabbing;user-select:none;}
   svg#board{width:2200px;height:1400px;display:block;}
   .toolbar{display:flex;gap:8px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);flex-wrap:wrap;}
   button.tb{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;}
@@ -129,7 +130,7 @@
   <button class="tb" id="importBtn">📂 Import</button>
   <button class="tb" id="exportBtn">💾 Export</button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
-  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ลากบนพื้นว่างเพื่อเลือกหลายโหนด · Shift+คลิกเพื่อเลือกเพิ่ม · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกแล้วกด Delete เพื่อลบ</span>
+  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ลากบนพื้นว่างเพื่อเลือกหลายโหนด · Shift+คลิกเพื่อเลือกเพิ่ม · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกแล้วกด Delete เพื่อลบ · คลิกขวา+ลากเพื่อเลื่อนกระดาน</span>
 </div>
 
 <div class="modal-back" id="nodeModal">
@@ -558,6 +559,31 @@ function mqUp(ev){
   }
 }
 
+const canvasWrap = document.querySelector('.canvas-wrap');
+let pan = null;
+canvasWrap.addEventListener('contextmenu', e=> e.preventDefault());
+canvasWrap.addEventListener('pointerdown', e=>{
+  if(e.button !== 2) return;
+  e.preventDefault();
+  pan = { x:e.clientX, y:e.clientY, sl:canvasWrap.scrollLeft, st:canvasWrap.scrollTop };
+  canvasWrap.classList.add('panning');
+  window.addEventListener('pointermove', panMove);
+  window.addEventListener('pointerup', panEnd);
+  window.addEventListener('pointercancel', panEnd);
+});
+function panMove(e){
+  if(!pan) return;
+  canvasWrap.scrollLeft = pan.sl - (e.clientX - pan.x);
+  canvasWrap.scrollTop = pan.st - (e.clientY - pan.y);
+}
+function panEnd(){
+  pan = null;
+  canvasWrap.classList.remove('panning');
+  window.removeEventListener('pointermove', panMove);
+  window.removeEventListener('pointerup', panEnd);
+  window.removeEventListener('pointercancel', panEnd);
+}
+
 function buildPalette(){
   const root = document.getElementById('palette');
   GROUPS.forEach(([title, types])=>{
@@ -688,6 +714,7 @@ function removeNode(id){
 }
 
 function onNodeDown(ev, n){
+  if(ev.button !== undefined && ev.button !== 0) return;
   if(viewMode) return;
   if(connectMode){
     if(!pendingFrom){ pendingFrom = n.id; render(); }
@@ -726,7 +753,7 @@ function setViewMode(on){
   const btn = document.getElementById('viewToggle');
   btn.classList.toggle('active', viewMode);
   btn.textContent = viewMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
-  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ลากบนพื้นว่างเพื่อเลือกหลายโหนด · Shift+คลิกเพื่อเลือกเพิ่ม · ลากโหนดที่เลือกไว้เพื่อย้ายทีเดียวหลายโหนด · ดับเบิลคลิกเพื่อดู/แก้ฟอร์แมท · Delete เพื่อลบ';
+  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ลากบนพื้นว่างเพื่อเลือกหลายโหนด · Shift+คลิกเพื่อเลือกเพิ่ม · ลากโหนดที่เลือกไว้เพื่อย้ายทีเดียวหลายโหนด · ดับเบิลคลิกเพื่อดู/แก้ฟอร์แมท · Delete เพื่อลบ · คลิกขวา+ลากเพื่อเลื่อนกระดาน';
   render();
 }
 document.getElementById('viewToggle').onclick = ()=> setViewMode(!viewMode);
