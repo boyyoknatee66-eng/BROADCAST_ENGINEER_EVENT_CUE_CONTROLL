@@ -34,6 +34,8 @@
   button.tb{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;}
   button.tb.active{border-color:var(--amber);color:var(--amber);}
   button.tb:hover{border-color:var(--teal);}
+  button.tb:disabled{opacity:.38;cursor:default;}
+  button.tb:disabled:hover{border-color:var(--line);color:var(--text);}
   .hint{color:var(--sub);font-size:.78rem;margin-left:auto;}
   .node rect{fill:var(--panel2);stroke:var(--line);stroke-width:1.3;}
   .node.cat-src rect{stroke:var(--violet);}
@@ -51,6 +53,7 @@
   .edge-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer;}
   body.view-mode .edge-hit{pointer-events:none;}
   .edge.pending{stroke:var(--teal);stroke-dasharray:4 3;}
+  .marquee{fill:rgba(79,209,197,.10);stroke:var(--teal);stroke-width:1;stroke-dasharray:5 3;pointer-events:none;}
   .node .fmt{fill:var(--amber);font-size:10px;font-family:inherit;}
   .modal-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:60;align-items:center;justify-content:center;padding:16px;}
   .modal-back.open{display:flex;}
@@ -121,10 +124,12 @@
 <div class="toolbar">
   <button class="tb" id="viewToggle">👁️ โหมดดูอย่างเดียว</button>
   <button class="tb" id="connectBtn">🔗 เชื่อมเส้น</button>
+  <button class="tb" id="undoBtn" title="เลื่อนกลับ (Ctrl+Z)" disabled>↩️ Undo</button>
+  <button class="tb" id="redoBtn" title="ทำซ้ำ (Ctrl+Y / Ctrl+Shift+Z)" disabled>↪️ Redo</button>
   <button class="tb" id="importBtn">📂 Import</button>
   <button class="tb" id="exportBtn">💾 Export</button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
-  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกโหนด/เส้นแล้วกด Delete เพื่อลบ</span>
+  <span class="hint" id="hint">คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ลากบนพื้นว่างเพื่อเลือกหลายโหนด · Shift+คลิกเพื่อเลือกเพิ่ม · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกแล้วกด Delete เพื่อลบ</span>
 </div>
 
 <div class="modal-back" id="nodeModal">
@@ -274,7 +279,7 @@ GROUPS.forEach(([title, types])=>{
   const cat = GROUP_STROKE[title];
   if(cat) types.forEach(t => CAT[t] = cat);
 });
-let nodes = [], edges = [], nextId = 1, connectMode = false, pendingFrom = null, selectedEdge = null, selectedNode = null, viewMode = false;
+let nodes = [], edges = [], nextId = 1, connectMode = false, pendingFrom = null, selectedEdge = null, selectedNodes = new Set(), viewMode = false, dragMoved = false;
 const svgNodes = document.getElementById('nodes');
 const svgEdges = document.getElementById('edges');
 const KEY = 'bcast_workflow_v1';
@@ -396,6 +401,7 @@ function openNodeDialog(n){
 function closeNodeDialog(){ modal.classList.remove('open'); modalNode = null; }
 function saveNodeDialog(){
   if(!modalNode) return;
+  const before = stateSnap();
   const name = fName.value.trim();
   if(name) modalNode.label = name;
   modalNode.color = fColor.value || null;
@@ -407,24 +413,29 @@ function saveNodeDialog(){
     showVideo: showVideo.checked,
     showAudio: showAudio.checked
   };
+  commitHistory(before);
   closeNodeDialog(); render(); save();
 }
 document.getElementById('mSave').onclick = saveNodeDialog;
 document.getElementById('mCancel').onclick = closeNodeDialog;
 modal.addEventListener('click', e=>{ if(e.target === modal) closeNodeDialog(); });
 window.addEventListener('keydown', e=>{
+  const el = e.target;
+  const inField = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
+  if(!inField && (e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); return; }
+  if(!inField && (e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')){ e.preventDefault(); redo(); return; }
   if(e.key === 'Escape'){
     if(modal.classList.contains('open')) closeNodeDialog();
     else if(infoNode) hideInfo();
-    else if(selectedNode){ selectedNode = null; render(); }
+    else if(selectedNodes.size){ selectedNodes.clear(); render(); }
     return;
   }
   if(e.key !== 'Delete' && e.key !== 'Backspace') return;
   const t = e.target;
   if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
   if(modal.classList.contains('open') || viewMode) return;
-  if(selectedNode){ e.preventDefault(); removeNode(selectedNode); }
-  else if(selectedEdge){ e.preventDefault(); edges = edges.filter(x=>x!==selectedEdge); selectedEdge=null; render(); save(); }
+  if(selectedNodes.size){ e.preventDefault(); const before = stateSnap(); Array.from(selectedNodes).forEach(id=>removeNode(id)); selectedNodes.clear(); commitHistory(before); }
+  else if(selectedEdge){ e.preventDefault(); const before = stateSnap(); edges = edges.filter(x=>x!==selectedEdge); selectedEdge=null; render(); save(); commitHistory(before); }
 });
 
 const pop = document.getElementById('infoPop');
@@ -474,10 +485,69 @@ function showInfo(n){
 function hideInfo(){ pop.classList.remove('open'); infoNode = null; }
 boardEl.addEventListener('click', ()=>{
   if(infoNode) hideInfo();
-  const had = selectedNode || selectedEdge;
-  selectedNode = null; selectedEdge = null;
+  if(Date.now() - suppressClearAt < 400) return;
+  const had = selectedNodes.size || selectedEdge;
+  selectedNodes.clear(); selectedEdge = null;
   if(had) render();
 });
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+let mq = null, mqStart = null, suppressClearAt = 0;
+function boardPoint(ev){
+  const rect = boardEl.getBoundingClientRect();
+  const vb = boardEl.viewBox.baseVal;
+  return { x:(ev.clientX-rect.left)*(vb.width/rect.width), y:(ev.clientY-rect.top)*(vb.height/rect.height) };
+}
+boardEl.addEventListener('pointerdown', (ev)=>{
+  if(viewMode || connectMode) return;
+  if(ev.button !== undefined && ev.button !== 0) return;
+  const t = ev.target;
+  if(t && t.closest && t.closest('.node')) return;
+  if(t && t.tagName === 'path') return;
+  dragMoved = false;
+  mqStart = boardPoint(ev);
+  mq = document.createElementNS(SVGNS,'rect');
+  mq.setAttribute('class','marquee');
+  mq.setAttribute('x', mqStart.x); mq.setAttribute('y', mqStart.y);
+  mq.setAttribute('width', 0); mq.setAttribute('height', 0);
+  boardEl.appendChild(mq);
+  ev.preventDefault();
+  window.addEventListener('pointermove', mqMove);
+  window.addEventListener('pointerup', mqUp);
+});
+function mqMove(ev){
+  if(!mq || !mqStart) return;
+  const p = boardPoint(ev);
+  const x = Math.min(mqStart.x, p.x), y = Math.min(mqStart.y, p.y);
+  const w = Math.abs(p.x - mqStart.x), h = Math.abs(p.y - mqStart.y);
+  if(w < 3 && h < 3) return;
+  dragMoved = true;
+  mq.setAttribute('x', x); mq.setAttribute('y', y);
+  mq.setAttribute('width', w); mq.setAttribute('height', h);
+}
+function mqUp(ev){
+  window.removeEventListener('pointermove', mqMove);
+  window.removeEventListener('pointerup', mqUp);
+  const moved = dragMoved;
+  let rect = null;
+  if(mqStart){
+    const p = boardPoint(ev);
+    rect = { x:Math.min(mqStart.x, p.x), y:Math.min(mqStart.y, p.y), w:Math.abs(p.x - mqStart.x), h:Math.abs(p.y - mqStart.y) };
+  }
+  if(mq){ mq.remove(); mq = null; }
+  mqStart = null;
+  if(moved && rect && (rect.w >= 3 || rect.h >= 3)){
+    suppressClearAt = Date.now();
+    if(!ev.shiftKey) selectedNodes.clear();
+    nodes.forEach(n=>{
+      const w = nodeWidth(n);
+      if(n.x < rect.x + rect.w && n.x + w > rect.x && n.y < rect.y + rect.h && n.y + NODE_H > rect.y) selectedNodes.add(n.id);
+    });
+    selectedEdge = null;
+    dragMoved = false;
+    render();
+  }
+}
 
 function buildPalette(){
   const root = document.getElementById('palette');
@@ -496,10 +566,12 @@ function buildPalette(){
 }
 
 function addNode(type, x, y){
+  const before = stateSnap();
   const id = 'n'+(nextId++);
   const cx = x ?? (120 + (nodes.length%7)*190);
   const cy = y ?? (100 + Math.floor(nodes.length/7)*150);
   nodes.push({id, type, x:cx, y:cy});
+  commitHistory(before);
   render(); save();
 }
 
@@ -539,7 +611,7 @@ function render(){
     const a = nodes.find(n=>n.id===e.from), b = nodes.find(n=>n.id===e.to);
     if(!a||!b) return;
     const d = edgePath(a,b);
-    const pick = (ev)=>{ if(viewMode) return; ev.stopPropagation(); selectedEdge = (selectedEdge===e)?null:e; selectedNode=null; render(); };
+    const pick = (ev)=>{ if(viewMode) return; ev.stopPropagation(); selectedEdge = (selectedEdge===e)?null:e; selectedNodes.clear(); render(); };
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('class','edge'+(selectedEdge===e?' pending':''));
     path.setAttribute('d', d);
@@ -555,7 +627,7 @@ function render(){
   nodes.forEach(n=>{
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
     const cat = CAT[n.type] ? ' cat-'+CAT[n.type] : '';
-    g.setAttribute('class','node'+cat+((pendingFrom===n.id || selectedNode===n.id)?' selected':''));
+    g.setAttribute('class','node'+cat+((pendingFrom===n.id || selectedNodes.has(n.id))?' selected':''));
     g.setAttribute('transform',`translate(${n.x},${n.y})`);
     
     const fmt = n.fmt || {};
@@ -584,7 +656,12 @@ function render(){
       ev.stopPropagation();
       if(viewMode){ showInfo(n); return; }
       if(connectMode) return;
-      selectedNode = n.id;
+      if(ev.shiftKey){
+        if(selectedNodes.has(n.id)) selectedNodes.delete(n.id); else selectedNodes.add(n.id);
+      } else if(!(dragMoved && selectedNodes.has(n.id))){
+        selectedNodes.clear(); selectedNodes.add(n.id);
+      }
+      dragMoved = false;
       selectedEdge = null;
       render();
     });
@@ -596,7 +673,7 @@ function removeNode(id){
   nodes = nodes.filter(n=>n.id!==id);
   edges = edges.filter(e=>e.from!==id && e.to!==id);
   if(pendingFrom===id) pendingFrom=null;
-  if(selectedNode===id) selectedNode=null;
+  selectedNodes.delete(id);
   if(infoNode && infoNode.id===id) hideInfo();
   render(); save();
 }
@@ -606,40 +683,47 @@ function onNodeDown(ev, n){
   if(connectMode){
     if(!pendingFrom){ pendingFrom = n.id; render(); }
     else if(pendingFrom !== n.id){
+      const before = stateSnap();
       edges.push({from:pendingFrom, to:n.id});
-      pendingFrom = null; render(); save();
+      pendingFrom = null;
+      commitHistory(before);
+      render(); save();
     }
     return;
   }
-  const board = document.getElementById('board');
-  const start = board.createSVGPoint();
+  const histBefore = stateSnap();
+  const startP = boardPoint(ev);
+  const group = (selectedNodes.has(n.id) && selectedNodes.size > 1) ? nodes.filter(x=>selectedNodes.has(x.id)) : [n];
+  const origin = group.map(m=>({m, x:m.x, y:m.y}));
+  dragMoved = false;
   const move = (mv)=>{
-    const rect = board.getBoundingClientRect();
-    const vb = board.viewBox.baseVal;
-    const x = (mv.clientX-rect.left)*(vb.width/rect.width) - nodeWidth(n)/2;
-    const y = (mv.clientY-rect.top)*(vb.height/rect.height) - NODE_H/2;
-    n.x = Math.max(0,x); n.y = Math.max(0,y);
+    const p = boardPoint(mv);
+    const dx = p.x - startP.x, dy = p.y - startP.y;
+    if(!dragMoved && Math.abs(dx) + Math.abs(dy) < 2) return;
+    dragMoved = true;
+    origin.forEach(o=>{ o.m.x = Math.max(0, o.x + dx); o.m.y = Math.max(0, o.y + dy); });
     render();
   };
-  const up = ()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); save(); };
+  const up = ()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); if(dragMoved){ save(); commitHistory(histBefore); suppressClearAt = Date.now(); } };
   window.addEventListener('pointermove',move);
   window.addEventListener('pointerup',up);
 }
 
 function setViewMode(on){
-  viewMode = on; connectMode = false; pendingFrom = null; selectedEdge = null; selectedNode = null;
+  viewMode = on; connectMode = false; pendingFrom = null; selectedEdge = null; selectedNodes.clear();
   hideInfo();
+  updateHistoryBtns();
   document.body.classList.toggle('view-mode', viewMode);
   const btn = document.getElementById('viewToggle');
   btn.classList.toggle('active', viewMode);
   btn.textContent = viewMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
-  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ดับเบิลคลิกที่โหนดเพื่อดู/แก้ฟอร์แมท · เลือกโหนด/เส้นแล้วกด Delete เพื่อลบ';
+  document.getElementById('hint').textContent = viewMode ? 'โหมดดูอย่างเดียว — ไม่สามารถแก้ไขผังได้ (ดับเบิลคลิกโหนดเพื่อดูรายละเอียด)' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด · ลากบนพื้นว่างเพื่อเลือกหลายโหนด · Shift+คลิกเพื่อเลือกเพิ่ม · ลากโหนดที่เลือกไว้เพื่อย้ายทีเดียวหลายโหนด · ดับเบิลคลิกเพื่อดู/แก้ฟอร์แมท · Delete เพื่อลบ';
   render();
 }
 document.getElementById('viewToggle').onclick = ()=> setViewMode(!viewMode);
 
 document.getElementById('connectBtn').onclick = (e)=>{
-  connectMode = !connectMode; pendingFrom=null; selectedNode=null;
+  connectMode = !connectMode; pendingFrom=null; selectedNodes.clear();
   e.target.classList.toggle('active', connectMode);
   document.getElementById('hint').textContent = connectMode ? 'คลิกโหนดต้นทาง แล้วคลิกโหนดปลายทาง เพื่อวาดเส้น' : 'คลิกไอคอนซ้ายมือเพื่อเพิ่มโหนด';
   render();
@@ -668,12 +752,14 @@ function importJson(text){
   const s = sanitizeNodes(d.nodes);
   if(!s.nodes.length && !confirm('ไม่พบโหนดที่รู้จักในไฟล์นี้ ต้องการเปิดผังว่างหรือไม่?')) return false;
   const ids = new Set(s.nodes.map(n=>n.id));
+  const before = stateSnap();
   nodes = s.nodes;
   edges = (Array.isArray(d.edges) ? d.edges : [])
     .filter(e=>e && ids.has(e.from) && ids.has(e.to))
     .map(e=>({from:e.from, to:e.to}));
   nextId = s.nextId;
-  pendingFrom = null; selectedEdge = null; selectedNode = null; hideInfo();
+  pendingFrom = null; selectedEdge = null; selectedNodes.clear(); hideInfo();
+  commitHistory(before);
   render(); save();
   document.getElementById('hint').textContent = 'โหลดไฟล์แล้ว — ' + nodes.length + ' โหนด, ' + edges.length + ' เส้น';
   return true;
@@ -705,6 +791,45 @@ document.getElementById('importFile').onchange = function(){
   rd.readAsText(file);
 };
 
+let undoStack = [], redoStack = [];
+const HISTORY_LIMIT = 100;
+function stateSnap(){ return JSON.stringify({nodes, edges}); }
+function updateHistoryBtns(){
+  const u = document.getElementById('undoBtn'), r = document.getElementById('redoBtn');
+  if(u) u.disabled = viewMode || !undoStack.length;
+  if(r) r.disabled = viewMode || !redoStack.length;
+}
+function commitHistory(before){
+  if(!before || before === stateSnap()) return;
+  undoStack.push(before);
+  if(undoStack.length > HISTORY_LIMIT) undoStack.shift();
+  redoStack.length = 0;
+  updateHistoryBtns();
+}
+function applySnap(s){
+  const d = JSON.parse(s);
+  nodes = d.nodes; edges = d.edges;
+  let max = 0;
+  nodes.forEach(n=>{ const m = /^n(\d+)$/.exec(String(n.id)); if(m) max = Math.max(max, +m[1]); });
+  if(max >= nextId) nextId = max + 1;
+  selectedNodes.clear(); selectedEdge = null; pendingFrom = null;
+  render(); save();
+}
+function undo(){
+  if(!undoStack.length || viewMode) return;
+  redoStack.push(stateSnap());
+  applySnap(undoStack.pop());
+  updateHistoryBtns();
+}
+function redo(){
+  if(!redoStack.length || viewMode) return;
+  undoStack.push(stateSnap());
+  applySnap(redoStack.pop());
+  updateHistoryBtns();
+}
+document.getElementById('undoBtn').onclick = undo;
+document.getElementById('redoBtn').onclick = redo;
+
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify({nodes, edges, nextId})); }catch(e){}
 }
@@ -720,6 +845,8 @@ function load(){
     }
     else { nodes = []; edges = []; nextId = 1; }
   }catch(e){ nodes = []; edges = []; nextId = 1; }
+  undoStack.length = 0; redoStack.length = 0;
+  updateHistoryBtns();
 }
 
 buildPalette();
